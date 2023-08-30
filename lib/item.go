@@ -80,7 +80,7 @@ type Item struct {
 	HasMoreNotes   bool        `json:"has_more_notes"`
 	IsArchived     int         `json:"is_archived"`
 	IsDeleted      bool        `json:"is_deleted"`
-	ItemOrder      int         `json:"item_order"`
+	ChildOrder     int         `json:"child_order"`
 	LabelNames     []string    `json:"labels"`
 	Priority       int         `json:"priority"`
 	AutoReminder   bool        `json:"auto_reminder"`
