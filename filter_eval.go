@@ -5,7 +5,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/sachaos/todoist/lib"
+	todoist "github.com/sachaos/todoist/lib"
 )
 
 var priorityRegex = regexp.MustCompile("^p([1-4])$")
@@ -43,7 +43,10 @@ func Eval(e Expression, item todoist.AbstractItem, projects todoist.Projects) (r
 		}
 	case DateExpr:
 		e := e.(DateExpr)
-		return EvalDate(e, item.DateTime()), err
+		return EvalDate(e, item), err
+	case ViewAllExpr:
+		// we could fall through to the default, but let's not
+	  return true, nil
 	case NotOpExpr:
 		e := e.(NotOpExpr)
 		r, err := Eval(e.expr, item, projects)
@@ -57,7 +60,19 @@ func Eval(e Expression, item todoist.AbstractItem, projects todoist.Projects) (r
 	return
 }
 
-func EvalDate(e DateExpr, itemDate time.Time) (result bool) {
+func EvalDate(e DateExpr, item todoist.AbstractItem) (result bool) {
+	itemDate := item.DateTime()
+	if e.operation == NO_TIME {
+		i := item.(*todoist.Item)
+		if i.Due == nil {
+			// no date is also no time
+			return true
+		} else {
+			_, err := time.Parse(time.DateOnly, i.Due.Date)
+			return err == nil // only a date 
+		}
+	}
+
 	if (itemDate == time.Time{}) {
 		return e.operation == NO_DUE_DATE
 	}

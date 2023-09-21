@@ -6,7 +6,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/sachaos/todoist/lib"
+	todoist "github.com/sachaos/todoist/lib"
 )
 
 const DateFormat = "Mon 2 Jan 2006 15:04:05 +0000"
@@ -96,6 +96,25 @@ func TestNotOpEval(t *testing.T) {
 	testFilterEval(t, "!p4", todoist.Item{Priority: 1}, false)
 	testFilterEval(t, "!(p3 | p4)", todoist.Item{Priority: 2}, false)
 	testFilterEval(t, "!(p3 | p4)", todoist.Item{Priority: 3}, true)
+}
+
+func TestViewAllExp(t *testing.T) {
+	testFilterEval(t, "view all", todoist.Item{Priority: 1}, true)
+	testFilterEval(t, "view all", todoist.Item{Priority: 2}, true)
+	testFilterEval(t, "view all", todoist.Item{Priority: 3}, true)
+}
+
+func TestNoTimeExp(t *testing.T) {
+	timeNow := time.Date(2017, time.October, 2, 1, 0, 0, 0, testTimeZone) // JST: Mon 2 Oct 2017 00:00:00
+	setNow(timeNow)
+	// not midnight
+	testFilterEval(t, "no time", todoist.Item{Due: due("Sun 1 Oct 2017 14:00:00 +0000")}, false)
+	// midnight is a time
+	testFilterEval(t, "no time", todoist.Item{Due: due("Sun 1 Oct 2017 15:00:00 +0000")}, false)
+
+	testFilterEval(t, "no time", todoist.Item{}, true)
+	// actually no time
+	testFilterEval(t, "no time", todoist.Item{Due: &todoist.Due{Date: "2015-03-15"}}, true)
 }
 
 func TestDueOnEval(t *testing.T) {
