@@ -192,6 +192,8 @@ func (l *Lexer) Lex(lval *yySymType) int {
 			token = DAYS
 		} else if lowerToken == "hours" {
 			token = HOURS
+		} else if lowerToken == "shared" {
+			token = SHARED
 		} else if lowerToken == "created" {
 			token = CREATED
 		} else if lowerToken == "subtask" {

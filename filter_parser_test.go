@@ -223,6 +223,48 @@ func TestSubtask(t *testing.T) {
 	)
 }
 
+func TestShared(t *testing.T) {
+	assert.Equal(t,
+		SharedExpr{},
+		Filter("shared"),
+	)
+}
+
+func TestPerson(t *testing.T) {
+	assert.Equal(t,
+		PersonExpr{operation: ASSIGNED_TO, person: "me"},
+		Filter("assigned to: me"),
+	)
+
+	assert.Equal(t,
+		PersonExpr{operation: ASSIGNED_BY, person: "me"},
+		Filter("assigned by: me"),
+	)
+
+	assert.Equal(t,
+		PersonExpr{operation: ASSIGNED_TO, person: "Becky"},
+		Filter("assigned to: Becky"),
+	)
+
+	assert.Equal(t,
+		PersonExpr{operation: ADDED_BY, person: "me"},
+		Filter("added by: me"),
+	)
+
+	assert.Equal(t,
+		PersonExpr{operation: ADDED_BY, person: "Becky"},
+		Filter("added by: Becky"),
+	)
+}
+
+func TestAssigned(t *testing.T) {
+	assert.Equal(t,
+		AssignedExpr{},
+		Filter("assigned"),
+	)
+}
+
+
 func TestDateTimeElapsedFilter(t *testing.T) {
 	timeNow := time.Date(2017, time.January, 2, 18, 0, 0, 0, testTimeZone)
 	setNow(timeNow)
@@ -272,8 +314,7 @@ func TestNoSyntaxErrorAllOfficialExamples(t *testing.T) {
 		"due before: +8 hours & !overdue",
 		"subtask",
 		"!subtask",
-
-		// need more tests
+		"shared & !assigned",
 		"assigned to: me",
 		"#Work & assigned to: me",
 		"assigned by: me",
@@ -281,7 +322,6 @@ func TestNoSyntaxErrorAllOfficialExamples(t *testing.T) {
 		"assigned to: Becky",
 		"added by: me",
 		"added by: Becky",
-		"shared & !assigned",
 	}
 	for _, input := range tests {
 		e := Filter(input)
