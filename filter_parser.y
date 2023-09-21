@@ -17,9 +17,9 @@ import (
 %type<expr> s_date
 %type<expr> s_date_year
 %type<expr> s_overdue s_nodate s_project_key s_project_all_key s_label_key s_no_labels
-%type<expr> s_time
-%token<token> BY TO ADDED ASSIGNED
-%token<token> STRING NUMBER MINUS PLUS
+%type<expr> s_time s_person
+%token<token> BY TO ADDED ASSIGNED SUBTASK SHARED
+%token<token> STRING NUMBER
 %token<token> MONTH_IDENT TWELVE_CLOCK_IDENT HOURS
 %token<token> TODAY_IDENT TOMORROW_IDENT YESTERDAY_IDENT DAYS VIEW ALL
 %token<token> DUE CREATED BEFORE AFTER OVER OVERDUE NO DATE TIME LABELS '#' '@'
@@ -109,7 +109,23 @@ expr
         e.operation = DUE_AFTER
         $$ = e
     }
-    | ASSIGNED TO ':' STRING
+    | SHARED
+    {
+        $$ = SharedExpr{}
+    }
+    | SUBTASK
+    {
+        $$ = SubtaskExpr{}
+    }
+    | ASSIGNED
+    {
+        $$ = AssignedExpr{}
+    }
+    | s_person
+    | s_datetime
+
+s_person
+    : ASSIGNED TO ':' STRING
     {
         $$ = PersonExpr{operation: ASSIGNED_TO, person:$4.literal}
     }
@@ -121,8 +137,7 @@ expr
     {
         $$ = PersonExpr{operation: ADDED_BY, person:$4.literal}
     }
-    | s_datetime
-
+   
 s_project_all_key
     : '#' '#'
     {
@@ -188,7 +203,7 @@ s_datetime
         }
         $$ = DateExpr{allDay: false, datetime: today().Add(d)}
     }
-    | MINUS NUMBER DAYS
+    | '-' NUMBER DAYS
     {
         date := today().AddDate(0, 0, -atoi($2.literal))
         $$ = DateExpr{allDay: true, datetime: date, operation: DUE_BEFORE}
@@ -257,7 +272,7 @@ s_time
     {
         $$ = time.Duration(int64(time.Hour) * int64(atoi($1.literal)) + int64(time.Minute) * int64(atoi($3.literal)) + int64(time.Second) * int64(atoi($5.literal)))
     }
-    | PLUS NUMBER HOURS
+    | '+' NUMBER HOURS
     {
         $$ = time.Duration(int64(time.Hour) * int64(atoi($2.literal)))
     }

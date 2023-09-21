@@ -21,6 +21,12 @@ type VoidExpr struct{}
 
 type ViewAllExpr struct{}
 
+type AssignedExpr struct{}
+
+type SubtaskExpr struct{}
+
+type SharedExpr struct{}
+
 type StringExpr struct {
 	literal string
 }
@@ -188,16 +194,13 @@ func (l *Lexer) Lex(lval *yySymType) int {
 			token = HOURS
 		} else if lowerToken == "created" {
 			token = CREATED
+		} else if lowerToken == "subtask" {
+			token = SUBTASK
 		} else {
 			token = STRING
 		}
 	case scanner.Int:
 		token = NUMBER
-	// todo can I put these in the yacc like ':'?
-	case int('-'):
-		token = MINUS
-	case int('+'):
-		token = PLUS
 	}
 	lval.token = Token{token: token, literal: l.TokenText()}
 	return token

@@ -216,6 +216,13 @@ func TestNoTime(t *testing.T) {
 	)
 }
 
+func TestSubtask(t *testing.T) {
+	assert.Equal(t,
+		SubtaskExpr{},
+		Filter("subtask"),
+	)
+}
+
 func TestDateTimeElapsedFilter(t *testing.T) {
 	timeNow := time.Date(2017, time.January, 2, 18, 0, 0, 0, testTimeZone)
 	setNow(timeNow)
@@ -263,23 +270,18 @@ func TestNoSyntaxErrorAllOfficialExamples(t *testing.T) {
 		"created before: -30 days",
 		"created before: -365 days",
 		"due before: +8 hours & !overdue",
+		"subtask",
+		"!subtask",
 
-		// TODO: these all fail
-
-		// "assigned to: me",
-		// "#Work & assigned to: me",
+		// need more tests
+		"assigned to: me",
+		"#Work & assigned to: me",
 		"assigned by: me",
 		"assigned to: me",
 		"assigned to: Becky",
 		"added by: me",
 		"added by: Becky",
-
-		// problematic... 
-		// "shared & !assigned",
-
-		// parse but not eval
-		"subtask",
-		"!subtask",
+		"shared & !assigned",
 	}
 	for _, input := range tests {
 		e := Filter(input)
