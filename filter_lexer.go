@@ -44,10 +44,10 @@ type NotOpExpr struct {
 	expr Expression
 }
 
-type DateOperation int
+type dateOperation int
 
 const (
-	DUE_ON DateOperation = iota
+	DUE_ON dateOperation = iota
 	DUE_BEFORE
 	DUE_AFTER
 	NO_DUE_DATE
@@ -56,7 +56,7 @@ const (
 )
 
 type DateExpr struct {
-	operation DateOperation
+	operation dateOperation
 	datetime  time.Time
 	allDay    bool
 }
@@ -124,6 +124,7 @@ var OverDueHash = map[string]bool{
 	"od":      true,
 }
 
+
 func (l *Lexer) Lex(lval *yySymType) int {
 	token := int(l.Scan())
 	switch token {
@@ -172,9 +173,9 @@ func (l *Lexer) Lex(lval *yySymType) int {
 		}
 	case scanner.Int:
 		token = NUMBER
-	case 45: // horrible hack todo maybe swap lexer to something other than scanner.Scanner
+	case int('-'):
 		token = MINUS
-	case 43: // horrible hack todo maybe swap lexer to something other than scanner.Scanner
+	case int('+'):
 		token = PLUS
 	default:
 	}
@@ -190,7 +191,7 @@ func Filter(f string) (e Expression) {
 	l := new(Lexer)
 	l.Init(strings.NewReader(f))
 	// important to exclude scanner.ScanFloats because afternoon times in am/pm format trigger float parsing
-	l.Mode = scanner.ScanIdents | scanner.ScanInts | scanner.ScanChars | scanner.ScanStrings | scanner.ScanRawStrings
+	l.Mode = scanner.ScanIdents | scanner.ScanInts
 	yyParse(l)
 	return l.result
 }
