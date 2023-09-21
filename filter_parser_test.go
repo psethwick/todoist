@@ -263,6 +263,8 @@ func TestNoSyntaxErrorAllOfficialExamples(t *testing.T) {
 		"7 days & @waiting",
 		"view all",
 		"no time",
+		"created before: -30 days",
+		"created before: -365 days",
 
 		// TODO: these all fail
 
@@ -273,9 +275,7 @@ func TestNoSyntaxErrorAllOfficialExamples(t *testing.T) {
 		// "added by: me",
 		// "added by: Becky",
 
-		// "due before: +8 hours & !overdue",
-		// "created before: -30 days",
-		// "created before: -365 days",
+		"due before: +8 hours & !overdue",
 	}
 	for _, input := range tests {
 		e := Filter(input)

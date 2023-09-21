@@ -18,10 +18,10 @@ import (
 %type<expr> s_date_year
 %type<expr> s_overdue s_nodate s_project_key s_project_all_key s_label_key s_no_labels
 %type<expr> s_time
-%token<token> STRING NUMBER
-%token<token> MONTH_IDENT TWELVE_CLOCK_IDENT
+%token<token> STRING NUMBER MINUS PLUS
+%token<token> MONTH_IDENT TWELVE_CLOCK_IDENT HOURS
 %token<token> TODAY_IDENT TOMORROW_IDENT YESTERDAY_IDENT DAYS VIEW ALL
-%token<token> DUE BEFORE AFTER OVER OVERDUE NO DATE TIME LABELS '#' '@'
+%token<token> DUE CREATED BEFORE AFTER OVER OVERDUE NO DATE TIME LABELS '#' '@'
 %left '&' '|'
 
 %%
@@ -82,11 +82,6 @@ expr
     {
         $$ = DateExpr{operation: NO_DUE_DATE}
     }
-    | NUMBER DAYS
-    {
-        date := today().AddDate(0, 0, atoi($1.literal))
-        $$ = DateExpr{allDay: true, datetime: date, operation: DUE_BEFORE}
-    }
     | VIEW ALL
     {
         $$ = ViewAllExpr{}
@@ -94,6 +89,12 @@ expr
     | NO TIME
     {
         $$ = DateExpr{operation: NO_TIME}
+    }
+    | CREATED BEFORE ':' s_datetime
+    {
+        e := $4.(DateExpr)
+        e.operation = CREATED_BEFORE
+        $$ = e
     }
     | DUE BEFORE ':' s_datetime
     {
@@ -174,6 +175,16 @@ s_datetime
         }
         $$ = DateExpr{allDay: false, datetime: today().Add(d)}
     }
+    | MINUS NUMBER DAYS
+    {
+        date := today().AddDate(0, 0, -atoi($2.literal))
+        $$ = DateExpr{allDay: true, datetime: date, operation: DUE_BEFORE}
+    }
+    | NUMBER DAYS
+    {
+        date := today().AddDate(0, 0, atoi($1.literal))
+        $$ = DateExpr{allDay: true, datetime: date, operation: DUE_BEFORE}
+    }
 
 s_date_year
     : NUMBER '/' NUMBER '/' NUMBER
@@ -232,6 +243,10 @@ s_time
     | NUMBER ':' NUMBER ':' NUMBER
     {
         $$ = time.Duration(int64(time.Hour) * int64(atoi($1.literal)) + int64(time.Minute) * int64(atoi($3.literal)) + int64(time.Second) * int64(atoi($5.literal)))
+    }
+    | PLUS NUMBER HOURS
+    {
+        $$ = time.Duration(int64(time.Hour) * int64(atoi($2.literal)))
     }
     | NUMBER TWELVE_CLOCK_IDENT
     {
