@@ -254,9 +254,6 @@ func TestNoSyntaxErrorAllOfficialExamples(t *testing.T) {
 	tests := []string{
 		"(today | overdue) & #Work",
 		"no date",
-		"shared & !assigned",
-		"subtask",
-		"!subtask",
 		"#Work & no due date",
 		"Saturday & @night",
 		"(P1 | P2) & 14 days",
@@ -269,13 +266,20 @@ func TestNoSyntaxErrorAllOfficialExamples(t *testing.T) {
 
 		// TODO: these all fail
 
-		//"assigned to: me",
-		//"#Work & assigned to: me",
-		// "assigned by: me",
-		// "assigned to: Becky",
-		// "added by: me",
-		// "added by: Becky",
+		// "assigned to: me",
+		// "#Work & assigned to: me",
+		"assigned by: me",
+		"assigned to: me",
+		"assigned to: Becky",
+		"added by: me",
+		"added by: Becky",
 
+		// problematic... 
+		// "shared & !assigned",
+
+		// parse but not eval
+		"subtask",
+		"!subtask",
 	}
 	for _, input := range tests {
 		e := Filter(input)

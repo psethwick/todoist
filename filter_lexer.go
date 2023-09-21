@@ -25,6 +25,19 @@ type StringExpr struct {
 	literal string
 }
 
+type personOperation int
+
+const (
+	ASSIGNED_TO personOperation = iota
+	ASSIGNED_BY
+	ADDED_BY
+)
+
+type PersonExpr struct {
+	person    string
+	operation personOperation
+}
+
 type BoolInfixOpExpr struct {
 	left     Expression
 	operator rune
@@ -124,7 +137,6 @@ var OverDueHash = map[string]bool{
 	"od":      true,
 }
 
-
 func (l *Lexer) Lex(lval *yySymType) int {
 	token := int(l.Scan())
 	switch token {
@@ -162,6 +174,14 @@ func (l *Lexer) Lex(lval *yySymType) int {
 			token = VIEW
 		} else if lowerToken == "all" {
 			token = ALL
+		} else if lowerToken == "to" {
+			token = TO
+		} else if lowerToken == "by" {
+			token = BY
+		} else if lowerToken == "added" {
+			token = ADDED
+		} else if lowerToken == "assigned" {
+			token = ASSIGNED
 		} else if lowerToken == "days" {
 			token = DAYS
 		} else if lowerToken == "hours" {
@@ -173,11 +193,11 @@ func (l *Lexer) Lex(lval *yySymType) int {
 		}
 	case scanner.Int:
 		token = NUMBER
+	// todo can I put these in the yacc like ':'?
 	case int('-'):
 		token = MINUS
 	case int('+'):
 		token = PLUS
-	default:
 	}
 	lval.token = Token{token: token, literal: l.TokenText()}
 	return token
