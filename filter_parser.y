@@ -11,16 +11,12 @@ import (
     expr Expression
 }
 
-%type<expr> filter
-%type<expr> expr
-%type<expr> s_datetime
-%type<expr> s_date
-%type<expr> s_date_year
-%type<expr> s_overdue s_nodate s_project_key s_project_all_key s_label_key s_no_labels
-%type<expr> s_time s_person
-%token<token> BY TO ADDED ASSIGNED SUBTASK SHARED
-%token<token> STRING NUMBER
-%token<token> MONTH_IDENT TWELVE_CLOCK_IDENT HOURS
+%type<expr> filter expr
+%type<expr> s_datetime s_date s_date_year
+%type<expr> s_overdue s_nodate s_project_key s_project_all_key 
+%type<expr> s_time s_person s_label_key s_no_labels
+%token<token> BY TO ADDED ASSIGNED SUBTASK SHARED STRING NUMBER
+%token<token> MONTH_IDENT TWELVE_CLOCK_IDENT HOURS PRIORITY
 %token<token> TODAY_IDENT TOMORROW_IDENT YESTERDAY_IDENT DAYS VIEW ALL
 %token<token> DUE CREATED BEFORE AFTER OVER OVERDUE NO DATE TIME LABELS '#' '@'
 
@@ -69,6 +65,18 @@ expr
     {
         $$ = LabelExpr{name: ""}
     }
+    | s_nodate
+    {
+        $$ = DateExpr{operation: NO_DUE_DATE}
+    }
+    | NO TIME
+    {
+        $$ = DateExpr{operation: NO_TIME}
+    }
+    | NO PRIORITY
+    {
+        $$ = NoPriorityExpr{}
+    }
     | '(' expr ')'
     {
         $$ = $2
@@ -81,17 +89,9 @@ expr
     {
         $$ = DateExpr{allDay: false, datetime: now(), operation: DUE_BEFORE}
     }
-    | s_nodate
-    {
-        $$ = DateExpr{operation: NO_DUE_DATE}
-    }
     | VIEW ALL
     {
         $$ = ViewAllExpr{}
-    }
-    | NO TIME
-    {
-        $$ = DateExpr{operation: NO_TIME}
     }
     | CREATED BEFORE ':' s_datetime
     {

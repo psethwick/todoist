@@ -14,6 +14,7 @@ func TestFilter(t *testing.T) {
 
 func TestPriorityFilter(t *testing.T) {
 	assert.Equal(t, StringExpr{literal: "p1"}, Filter("p1"), "they should be equal")
+	assert.Equal(t, NoPriorityExpr{}, Filter("No priority"), "they should be equal")
 }
 
 func TestProjectFilter(t *testing.T) {
@@ -322,6 +323,50 @@ func TestNoSyntaxErrorAllOfficialExamples(t *testing.T) {
 		"assigned to: Becky",
 		"added by: me",
 		"added by: Becky",
+		"No priority",
+//
+// "due: yesterday, today", // two separate lists ...
+// "#One \\& Two", // should match a project with literal name "One & Two"
+//
+// "recurring",
+// "next 5 days",
+// // text contains...
+// "search: Meeting",
+// "search: Meeting & today",
+// "search: Meeting | search: Work",
+// "search: email",
+// "search: http",
+// "search: http & search:*", // first wildcard...
+// // project / sections
+// "#Work",
+// "##Work",
+// "##School & !#Science",
+// "/Meetings", //See all tasks belonging to sections named "Meetings" across all projects
+// "#Work & /Meetings", // See all tasks belonging to the section "Meetings" in the project "Work"
+// "!/*",// See all tasks not assigned to sections
+// "!/* & !#Inbox",// See all tasks not assigned to sections, but excluding tasks in your Inbox
+// 		
+// // many date styles
+// "10/5/2022",
+// "Oct 5th 2022",
+// "10/5/2022 5pm",
+// "Oct 5th 5pm",
+// "today",
+// "tomorrow",
+// "yesterday",
+// "3 days",
+// "-3 days",
+// "Monday", // check day of week?
+// "Tuesday",
+// "Sunday",
+//
+// // wildcards
+// "@*ball",// will pull up a list of all tasks that have a label that ends with the word “ball”, like @baseball and @football.
+// "@home*",// See all tasks with any label that starts with “home”. For example, @homework and @homeoffice
+// "assigned to: m* smith",// See all tasks assigned to anyone whose first name starts with an M and last name is Smith
+// "#*Work",// See all tasks from projects which name ends with “work”. For example, #Artwork, #Network, and #Work
+// "Work*",// See all tasks from sections that have the word "Work" in the name. For example, /Work Meetings, /Work Admin, and /Work Calls
+// "!/*",// See all tasks that don't belong to any section
 	}
 	for _, input := range tests {
 		e := Filter(input)

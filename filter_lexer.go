@@ -21,6 +21,8 @@ type VoidExpr struct{}
 
 type ViewAllExpr struct{}
 
+type NoPriorityExpr struct{}
+
 type AssignedExpr struct{}
 
 type SubtaskExpr struct{}
@@ -39,6 +41,11 @@ const (
 	ADDED_BY
 )
 
+ // A collaborator can be identified by:
+ //    The person’s email
+ //    The person’s full name
+ //    “Me” (referring to yourself)
+ //    “Others” (referring to all users other than yourself)
 type PersonExpr struct {
 	person    string
 	operation personOperation
@@ -156,6 +163,8 @@ func (l *Lexer) Lex(lval *yySymType) int {
 			token = TODAY_IDENT
 		} else if _, ok := TomorrowIdentHash[lowerToken]; ok {
 			token = TOMORROW_IDENT
+		} else if _, ok := OverDueHash[lowerToken]; ok {
+			token = OVERDUE
 		} else if lowerToken == "yesterday" {
 			token = YESTERDAY_IDENT
 		} else if lowerToken == "due" {
@@ -166,8 +175,6 @@ func (l *Lexer) Lex(lval *yySymType) int {
 			token = AFTER
 		} else if lowerToken == "over" {
 			token = OVER
-		} else if _, ok := OverDueHash[lowerToken]; ok {
-			token = OVERDUE
 		} else if lowerToken == "no" {
 			token = NO
 		} else if lowerToken == "time" {
@@ -198,6 +205,8 @@ func (l *Lexer) Lex(lval *yySymType) int {
 			token = CREATED
 		} else if lowerToken == "subtask" {
 			token = SUBTASK
+		} else if lowerToken == "priority" {
+			token = PRIORITY
 		} else {
 			token = STRING
 		}
