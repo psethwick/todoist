@@ -23,7 +23,9 @@ import (
 %token<token> MONTH_IDENT TWELVE_CLOCK_IDENT HOURS
 %token<token> TODAY_IDENT TOMORROW_IDENT YESTERDAY_IDENT DAYS VIEW ALL
 %token<token> DUE CREATED BEFORE AFTER OVER OVERDUE NO DATE TIME LABELS '#' '@'
-%left '&' '|'
+
+%left '&' '|' '!' MONTH_IDENT
+%right NUMBER
 
 %%
 
