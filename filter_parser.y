@@ -16,7 +16,7 @@ import (
 %type<expr> s_overdue s_nodate s_project_key s_project_all_key 
 %type<expr> s_time s_person s_label_key s_no_labels
 %token<token> BY TO ADDED ASSIGNED SUBTASK SHARED STRING NUMBER
-%token<token> MONTH_IDENT TWELVE_CLOCK_IDENT HOURS PRIORITY
+%token<token> MONTH_IDENT TWELVE_CLOCK_IDENT HOURS PRIORITY RECURRING
 %token<token> TODAY_IDENT TOMORROW_IDENT YESTERDAY_IDENT DAYS VIEW ALL
 %token<token> DUE CREATED BEFORE AFTER OVER OVERDUE NO DATE TIME LABELS '#' '@'
 
@@ -44,6 +44,14 @@ expr
     | expr '&' expr
     {
         $$ = BoolInfixOpExpr{left: $1, operator: '&', right: $3}
+    }
+    | '(' expr ')'
+    {
+        $$ = $2
+    }
+    | '!' expr
+    {
+        $$ = NotOpExpr{expr: $2}
     }
     | STRING
     {
@@ -77,14 +85,6 @@ expr
     {
         $$ = NoPriorityExpr{}
     }
-    | '(' expr ')'
-    {
-        $$ = $2
-    }
-    | '!' expr
-    {
-        $$ = NotOpExpr{expr: $2}
-    }
     | s_overdue
     {
         $$ = DateExpr{allDay: false, datetime: now(), operation: DUE_BEFORE}
@@ -92,6 +92,10 @@ expr
     | VIEW ALL
     {
         $$ = ViewAllExpr{}
+    }
+    | RECURRING
+    {
+        $$ = RecurringExpr{}
     }
     | CREATED BEFORE ':' s_datetime
     {

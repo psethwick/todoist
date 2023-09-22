@@ -265,6 +265,13 @@ func TestAssigned(t *testing.T) {
 	)
 }
 
+func TestRecurring(t *testing.T) {
+	assert.Equal(t,
+		RecurringExpr{},
+		Filter("recurring"),
+	)
+}
+
 
 func TestDateTimeElapsedFilter(t *testing.T) {
 	timeNow := time.Date(2017, time.January, 2, 18, 0, 0, 0, testTimeZone)
@@ -323,12 +330,12 @@ func TestNoSyntaxErrorAllOfficialExamples(t *testing.T) {
 		"assigned to: Becky",
 		"added by: me",
 		"added by: Becky",
+    "recurring",
 		"No priority",
 //
 // "due: yesterday, today", // two separate lists ...
 // "#One \\& Two", // should match a project with literal name "One & Two"
 //
-// "recurring",
 // "next 5 days",
 // // text contains...
 // "search: Meeting",

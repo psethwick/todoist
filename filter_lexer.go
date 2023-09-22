@@ -25,6 +25,8 @@ type NoPriorityExpr struct{}
 
 type AssignedExpr struct{}
 
+type RecurringExpr struct{}
+
 type SubtaskExpr struct{}
 
 type SharedExpr struct{}
@@ -207,6 +209,8 @@ func (l *Lexer) Lex(lval *yySymType) int {
 			token = SUBTASK
 		} else if lowerToken == "priority" {
 			token = PRIORITY
+		} else if lowerToken == "recurring" {
+			token = RECURRING
 		} else {
 			token = STRING
 		}
