@@ -171,6 +171,8 @@ func (l *Lexer) Lex(lval *yySymType) int {
 			token = YESTERDAY_IDENT
 		} else if lowerToken == "due" {
 			token = DUE
+		} else if lowerToken == "next" {
+			token = NEXT
 		} else if lowerToken == "before" {
 			token = BEFORE
 		} else if lowerToken == "after" {

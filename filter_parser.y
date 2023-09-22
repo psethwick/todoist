@@ -15,7 +15,7 @@ import (
 %type<expr> s_datetime s_date s_date_year
 %type<expr> s_overdue s_nodate s_project_key s_project_all_key 
 %type<expr> s_time s_person s_label_key s_no_labels
-%token<token> BY TO ADDED ASSIGNED SUBTASK SHARED STRING NUMBER
+%token<token> BY TO ADDED ASSIGNED SUBTASK SHARED STRING NUMBER NEXT
 %token<token> MONTH_IDENT TWELVE_CLOCK_IDENT HOURS PRIORITY RECURRING
 %token<token> TODAY_IDENT TOMORROW_IDENT YESTERDAY_IDENT DAYS VIEW ALL
 %token<token> DUE CREATED BEFORE AFTER OVER OVERDUE NO DATE TIME LABELS '#' '@'
@@ -212,6 +212,11 @@ s_datetime
     | '-' NUMBER DAYS
     {
         date := today().AddDate(0, 0, -atoi($2.literal))
+        $$ = DateExpr{allDay: true, datetime: date, operation: DUE_BEFORE}
+    }
+    | NEXT NUMBER DAYS
+    {
+        date := today().AddDate(0, 0, atoi($2.literal))
         $$ = DateExpr{allDay: true, datetime: date, operation: DUE_BEFORE}
     }
     | NUMBER DAYS

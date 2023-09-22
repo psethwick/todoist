@@ -208,6 +208,10 @@ func TestSpecialDateTimeFilter(t *testing.T) {
 	assert.Equal(t,
 		DateExpr{operation: DUE_BEFORE, datetime: time.Date(2017, time.January, 15, 0, 0, 0, 0, testTimeZone), allDay: true},
 		Filter("14 days"), "they should be equal")
+
+	assert.Equal(t,
+		DateExpr{operation: DUE_BEFORE, datetime: time.Date(2017, time.January, 15, 0, 0, 0, 0, testTimeZone), allDay: true},
+		Filter("next 14 days"), "they should be equal")
 }
 
 func TestNoTime(t *testing.T) {
@@ -332,11 +336,11 @@ func TestNoSyntaxErrorAllOfficialExamples(t *testing.T) {
 		"added by: Becky",
     "recurring",
 		"No priority",
+    "next 5 days",
 //
 // "due: yesterday, today", // two separate lists ...
 // "#One \\& Two", // should match a project with literal name "One & Two"
 //
-// "next 5 days",
 // // text contains...
 // "search: Meeting",
 // "search: Meeting & today",
