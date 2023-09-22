@@ -27,10 +27,38 @@ func TestProjectFilter(t *testing.T) {
 
 	assert.Equal(t,
 		ProjectExpr{
+			isAll: false,
+			name:  "Work work",
+		},
+		Filter("#Work work"), "they should be equal")
+
+	assert.Equal(t,
+		ProjectExpr{
+			isAll: false,
+			name:  "Work work work",
+		},
+		Filter("#Work work work"), "they should be equal")
+
+	assert.Equal(t,
+		ProjectExpr{
 			isAll: true,
 			name:  "Work",
 		},
 		Filter("##Work"), "they should be equal")
+
+	// assert.Equal(t,
+	// 	ProjectExpr{
+	// 		isAll: true,
+	// 		name: "One & Two",
+	// 	},
+	// 	Filter("#One \\& Two"), "they should be equal")
+	//
+	// assert.Equal(t,
+	// 	ProjectExpr{
+	// 		isAll: true,
+	// 		name: "One | Two",
+	// 	},
+	// 	Filter("#One \\| Two"), "they should be equal")
 }
 
 func TestLabelFilter(t *testing.T) {
@@ -337,9 +365,10 @@ func TestNoSyntaxErrorAllOfficialExamples(t *testing.T) {
     "recurring",
 		"No priority",
     "next 5 days",
+		"#multiple words",
+   // "#One \\& Two", // should match a project with literal name "One & Two"
 //
 // "due: yesterday, today", // two separate lists ...
-// "#One \\& Two", // should match a project with literal name "One & Two"
 //
 // // text contains...
 // "search: Meeting",

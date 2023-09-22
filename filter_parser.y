@@ -3,6 +3,7 @@ package main
 
 import (
     "time"
+    "fmt"
     "strings"
 )
 %}
@@ -14,7 +15,7 @@ import (
 %type<expr> filter expr
 %type<expr> s_datetime s_date s_date_year
 %type<expr> s_overdue s_nodate s_project_key s_project_all_key 
-%type<expr> s_time s_person s_label_key s_no_labels
+%type<expr> s_time s_person s_label_key s_no_labels s_string
 %token<token> BY TO ADDED ASSIGNED SUBTASK SHARED STRING NUMBER NEXT
 %token<token> MONTH_IDENT TWELVE_CLOCK_IDENT HOURS PRIORITY RECURRING
 %token<token> TODAY_IDENT TOMORROW_IDENT YESTERDAY_IDENT DAYS VIEW ALL
@@ -53,21 +54,21 @@ expr
     {
         $$ = NotOpExpr{expr: $2}
     }
-    | STRING
+    | s_string
     {
-        $$ = StringExpr{literal: $1.literal}
+        $$ = $1
     }
-    | s_project_key STRING
+    | s_project_key s_string
     {
-        $$ = ProjectExpr{isAll: false, name: $2.literal}
+        $$ = ProjectExpr{isAll: false, name: $2.(StringExpr).literal}
     }
-    | s_project_all_key STRING
+    | s_project_all_key s_string
     {
-        $$ = ProjectExpr{isAll: true, name: $2.literal}
+        $$ = ProjectExpr{isAll: true, name: $2.(StringExpr).literal}
     }
-    | s_label_key STRING
+    | s_label_key s_string
     {
-        $$ = LabelExpr{name: $2.literal}
+        $$ = LabelExpr{name: $2.(StringExpr).literal}
     }
     | s_no_labels
     {
@@ -130,18 +131,28 @@ expr
     | s_person
     | s_datetime
 
+s_string
+    : STRING
+    {
+        $$ = StringExpr{literal:$1.literal}
+    }
+    | STRING s_string
+    {
+        $$ = StringExpr{literal:fmt.Sprintf("%s %s", $1.literal, $2.(StringExpr).literal)}
+    }
+
 s_person
-    : ASSIGNED TO ':' STRING
+    : ASSIGNED TO ':' s_string
     {
-        $$ = PersonExpr{operation: ASSIGNED_TO, person:$4.literal}
+        $$ = PersonExpr{operation: ASSIGNED_TO, person:$4.(StringExpr).literal}
     }
-    | ASSIGNED BY ':' STRING
+    | ASSIGNED BY ':' s_string
     {
-        $$ = PersonExpr{operation: ASSIGNED_BY, person:$4.literal}
+        $$ = PersonExpr{operation: ASSIGNED_BY, person:$4.(StringExpr).literal}
     }
-    | ADDED BY ':' STRING
+    | ADDED BY ':' s_string
     {
-        $$ = PersonExpr{operation: ADDED_BY, person:$4.literal}
+        $$ = PersonExpr{operation: ADDED_BY, person:$4.(StringExpr).literal}
     }
    
 s_project_all_key
