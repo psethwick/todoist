@@ -77,6 +77,13 @@ func TestProjectFilter(t *testing.T) {
 	// 		name: "Or|",
 	// 	},
 	// 	Filter("#Or\\|"), "they should be equal")
+
+	assert.Equal(t,
+		ProjectExpr{
+			isAll: false,
+			name: "*ball",
+		},
+		Filter("#*ball"), "they should be equal")
 }
 
 func TestLabelFilter(t *testing.T) {

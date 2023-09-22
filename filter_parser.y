@@ -20,7 +20,7 @@ import (
 %token<token> MONTH_IDENT TWELVE_CLOCK_IDENT HOURS PRIORITY RECURRING
 %token<token> TODAY_IDENT TOMORROW_IDENT YESTERDAY_IDENT DAYS VIEW ALL
 %token<token> DUE CREATED BEFORE AFTER OVER OVERDUE NO DATE TIME LABELS
-%token<token> '#' '@' '\\' '&' ' '
+%token<token> '#' '@' '\\' '&' '*'
 
 %left '&' '|' '!' MONTH_IDENT
 %right NUMBER STRING
@@ -151,6 +151,14 @@ s_string
     : STRING
     {
         $$ = StringExpr{literal:$1.literal}
+    }
+    | '*' STRING
+    {
+        $$ = StringExpr{literal:fmt.Sprintf("*%s", $2.literal)}
+    }
+    | STRING '*'
+    {
+        $$ = StringExpr{literal:fmt.Sprintf("%s*", $1.literal)}
     }
     | STRING s_string
     {
