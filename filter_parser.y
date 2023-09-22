@@ -15,15 +15,17 @@ import (
 %type<expr> filter expr
 %type<expr> s_datetime s_date s_date_year
 %type<expr> s_overdue s_nodate s_project_key s_project_all_key 
-%type<expr> s_time s_person s_label_key s_no_labels s_string
+%type<expr> s_time s_person s_label_key s_no_labels s_string s_escaped
 %token<token> BY TO ADDED ASSIGNED SUBTASK SHARED STRING NUMBER NEXT
 %token<token> MONTH_IDENT TWELVE_CLOCK_IDENT HOURS PRIORITY RECURRING
 %token<token> TODAY_IDENT TOMORROW_IDENT YESTERDAY_IDENT DAYS VIEW ALL
-%token<token> DUE CREATED BEFORE AFTER OVER OVERDUE NO DATE TIME LABELS '#' '@'
+%token<token> DUE CREATED BEFORE AFTER OVER OVERDUE NO DATE TIME LABELS
+%token<token> '#' '@' '\\' '&' ' '
 
 %left '&' '|' '!' MONTH_IDENT
-%right NUMBER
+%right NUMBER STRING
 
+%nonassoc '\\'
 %%
 
 filter
@@ -131,6 +133,20 @@ expr
     | s_person
     | s_datetime
 
+s_escaped
+    : '\\' '&'
+    {
+        $$ = "&"
+    }
+    | '\\' '!'
+    {
+        $$ = "!"
+    }
+    | '\\' '|'
+    {
+        $$ = "|"
+    }
+
 s_string
     : STRING
     {
@@ -139,6 +155,18 @@ s_string
     | STRING s_string
     {
         $$ = StringExpr{literal:fmt.Sprintf("%s %s", $1.literal, $2.(StringExpr).literal)}
+    }
+    | s_escaped s_string
+    {
+        $$ = StringExpr{literal:fmt.Sprintf("%s %s", $1, $2.(StringExpr).literal)}
+    }
+    | s_string s_escaped
+    {
+        $$ = StringExpr{literal:fmt.Sprintf("%s %s", $1.(StringExpr).literal, $2)}
+    }
+    | s_escaped
+    {
+        $$ = StringExpr{literal:$1.(string)}
     }
 
 s_person

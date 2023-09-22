@@ -46,19 +46,37 @@ func TestProjectFilter(t *testing.T) {
 		},
 		Filter("##Work"), "they should be equal")
 
+	assert.Equal(t,
+		ProjectExpr{
+			isAll: false,
+			name: "One & Two",
+		},
+		Filter("#One \\& Two"), "they should be equal")
+	
+	assert.Equal(t,
+		ProjectExpr{
+			isAll: false,
+			name: "One | Two",
+		},
+		Filter("#One \\| Two"), "they should be equal")
+
+	// current limitation from the lexer:
+	// we do not know about whitespace
+	// the above tests 'work' because the char is surrounded by spaces
+
 	// assert.Equal(t,
 	// 	ProjectExpr{
-	// 		isAll: true,
-	// 		name: "One & Two",
+	// 		isAll: false,
+	// 		name: "Exclam!",
 	// 	},
-	// 	Filter("#One \\& Two"), "they should be equal")
-	//
+	// 	Filter("#Exclam\\!"), "they should be equal")
+
 	// assert.Equal(t,
 	// 	ProjectExpr{
-	// 		isAll: true,
-	// 		name: "One | Two",
+	// 		isAll: false,
+	// 		name: "Or|",
 	// 	},
-	// 	Filter("#One \\| Two"), "they should be equal")
+	// 	Filter("#Or\\|"), "they should be equal")
 }
 
 func TestLabelFilter(t *testing.T) {
