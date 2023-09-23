@@ -84,6 +84,13 @@ func TestProjectFilter(t *testing.T) {
 			name: "*ball",
 		},
 		Filter("#*ball"), "they should be equal")
+
+	assert.Equal(t,
+		ProjectExpr{
+			isAll: false,
+			name: "base*",
+		},
+		Filter("#base*"), "they should be equal")
 }
 
 func TestLabelFilter(t *testing.T) {
