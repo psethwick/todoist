@@ -80,8 +80,8 @@ type BoolInfixOpExpr struct {
 }
 
 type ProjectExpr struct {
-	isAll bool
-	name  string
+	isAll   bool
+	name    string
 	section string
 }
 
@@ -158,13 +158,13 @@ var MonthIdentHash = map[string]time.Month{
 }
 
 var WeekdayHash = map[string]time.Weekday{
-  "sunday":  time.Sunday,
-	"monday": time.Monday,
-	"tuesday": time.Tuesday,
+	"sunday":    time.Sunday,
+	"monday":    time.Monday,
+	"tuesday":   time.Tuesday,
 	"wednesday": time.Wednesday,
-	"thursday": time.Thursday,
-	"friday": time.Friday,
-	"saturday": time.Saturday,
+	"thursday":  time.Thursday,
+	"friday":    time.Friday,
+	"saturday":  time.Saturday,
 }
 
 var OrdinalHash = map[string]bool{

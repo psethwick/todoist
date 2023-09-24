@@ -25,8 +25,8 @@ import (
 
 %left STRING
 %left MONTH_IDENT
-%left ORDINAL
 %left NUMBER
+
 %left '/'
 %left '*'
 %left '&' '|'
@@ -195,17 +195,17 @@ s_string
     {
         $$ = NewStringExpr($1.(string))
     }
-    | STRING s_string
+    | s_string STRING 
     {
-        $$ = NewStringExpr($1.literal).Add($2.(StringExpr))
+        $$ = $1.(StringExpr).Add(NewStringExpr($2.literal))
     }
-    | '*' s_string
+    | s_string '*' 
     {
-        $$ = NewStringExpr(".*").Add($2.(StringExpr))
+        $$ = $1.(StringExpr).Add(NewStringExpr(".*"))
     }
-    | s_escaped s_string
+    | s_string s_escaped
     {
-        $$ = NewStringExpr($1.(string)).Add($2.(StringExpr))
+        $$ = $1.(StringExpr).Add(NewStringExpr($2.(string)))
     }
 
 
@@ -308,10 +308,6 @@ s_date_year
     : NUMBER '/' NUMBER '/' NUMBER
     {
         $$ = time.Date(atoi($5.literal), time.Month(atoi($1.literal)), atoi($3.literal), 0, 0, 0, 0, timezone())
-    }
-    | MONTH_IDENT NUMBER ORDINAL NUMBER
-    {
-        $$ = time.Date(atoi($4.literal), MonthIdentHash[strings.ToLower($1.literal)], atoi($2.literal), 0, 0, 0, 0, timezone())
     }
     | MONTH_IDENT NUMBER NUMBER
     {

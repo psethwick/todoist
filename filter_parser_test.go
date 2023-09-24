@@ -401,6 +401,46 @@ func TestWeekday(t *testing.T) {
 	)
 }
 
+func TestSections(t *testing.T) {
+	assert.Equal(
+		t,
+		ProjectExpr{section: "Meetings"},
+		Filter("/Meetings"),
+	)
+
+	assert.Equal(
+		t,
+		ProjectExpr{name: "Work", section: "Meetings"},
+		Filter("#Work/Meetings"),
+	)
+
+	assert.Equal(
+		t,
+		BoolInfixOpExpr{
+			left:     ProjectExpr{name: "Work"},
+			operator: '&',
+			right:    ProjectExpr{section: "Meetings"},
+		},
+		Filter("#Work & /Meetings"),
+	)
+
+	assert.Equal(
+		t,
+		NotOpExpr{expr: ProjectExpr{section: ".*"}},
+		Filter("!/*"),
+	)
+
+	assert.Equal(
+		t,
+		BoolInfixOpExpr{
+			left:     NotOpExpr{expr: ProjectExpr{section: ".*"}},
+			operator: '&',
+			right:    NotOpExpr{expr: ProjectExpr{name: "Inbox"}},
+		},
+		Filter("!/* & !#Inbox"),
+	)
+}
+
 func TestNoSyntaxErrorAllOfficialExamples(t *testing.T) {
 	tests := []string{
 		"(today | overdue) & #Work",
@@ -441,7 +481,7 @@ func TestNoSyntaxErrorAllOfficialExamples(t *testing.T) {
 		"search: email",
 		"search: http",
 		"search: http & search:*",
-		
+
 		"Monday",
 		"Tuesday",
 		"Sunday",
@@ -452,24 +492,21 @@ func TestNoSyntaxErrorAllOfficialExamples(t *testing.T) {
 		"yesterday",
 		"3 days",
 		"-3 days",
-		"Oct 5th 2022",
+		"Oct 5th 5pm",
 
 		"#Work",
 		"##Work",
 		"##School & !#Science",
 
-		//
-		// // text contains...
-		// // project / sections
-		"/Meetings", //See all tasks belonging to sections named "Meetings" across all projects
-		"#Work/Meetings", //See all tasks belonging to sections named "Meetings" across all projects
-		"#Work & /Meetings", // See all tasks belonging to the section "Meetings" in the project "Work"
-		"!/*",// See all tasks not assigned to sections
-		"!/* & !#Inbox",// See all tasks not assigned to sections, but excluding tasks in your Inbox
-		
+		"/Meetings",
+		"#Work/Meetings",
+		"#Work & /Meetings",
+		"!/*",
+		"!/* & !#Inbox",
+
 		//  tricksy ones left:
-		// "Oct 5th 5pm", // seems like it should work, but syntax error
 		// "due: yesterday, today", // two separate lists ...
+		// "Oct 5th 2022",
 	}
 	for _, input := range tests {
 		e := Filter(input)
