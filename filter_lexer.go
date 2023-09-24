@@ -265,7 +265,12 @@ func (l *Lexer) Lex(lval *yySymType) int {
 			token = STRING
 		}
 	case scanner.Int:
-		token = NUMBER
+		i := atoi(l.TokenText())
+		if i > 2000 {
+			token = YEAR_NUMBER
+		} else {
+			token = NUMBER
+		}
 	}
 	lval.token = Token{token: token, literal: l.TokenText()}
 	return token

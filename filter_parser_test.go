@@ -492,6 +492,8 @@ func TestNoSyntaxErrorAllOfficialExamples(t *testing.T) {
 		"yesterday",
 		"3 days",
 		"-3 days",
+
+		"Oct 5th 2022",
 		"Oct 5th 5pm",
 
 		"#Work",
@@ -506,7 +508,6 @@ func TestNoSyntaxErrorAllOfficialExamples(t *testing.T) {
 
 		//  tricksy ones left:
 		// "due: yesterday, today", // two separate lists ...
-		// "Oct 5th 2022",
 	}
 	for _, input := range tests {
 		e := Filter(input)

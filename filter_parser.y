@@ -20,7 +20,7 @@ import (
 %token<token> MONTH_IDENT TWELVE_CLOCK_IDENT HOURS PRIORITY RECURRING
 %token<token> TODAY_IDENT TOMORROW_IDENT YESTERDAY_IDENT DAYS VIEW ALL
 %token<token> DUE CREATED BEFORE AFTER OVER OVERDUE NO DATE TIME LABELS
-%token<token> SEARCH ORDINAL WEEKDAY
+%token<token> SEARCH ORDINAL WEEKDAY YEAR_NUMBER
 %token<token> '#' '@' '\\' '&' '*' '/'
 
 %left STRING
@@ -43,8 +43,7 @@ filter
     }
     | expr
     {
-        $$ = $1
-        yylex.(*Lexer).result = $$
+        yylex.(*Lexer).result = $1
     }
 
 expr
@@ -305,15 +304,19 @@ s_datetime /*  */
     }
 
 s_date_year
-    : NUMBER '/' NUMBER '/' NUMBER
+    : NUMBER '/' NUMBER '/' YEAR_NUMBER
     {
         $$ = time.Date(atoi($5.literal), time.Month(atoi($1.literal)), atoi($3.literal), 0, 0, 0, 0, timezone())
     }
-    | MONTH_IDENT NUMBER NUMBER
+    | MONTH_IDENT NUMBER YEAR_NUMBER
     {
         $$ = time.Date(atoi($3.literal), MonthIdentHash[strings.ToLower($1.literal)], atoi($2.literal), 0, 0, 0, 0, timezone())
     }
-    | NUMBER MONTH_IDENT NUMBER
+    | MONTH_IDENT NUMBER ORDINAL YEAR_NUMBER
+    {
+        $$ = time.Date(atoi($4.literal), MonthIdentHash[strings.ToLower($1.literal)], atoi($2.literal), 0, 0, 0, 0, timezone())
+    }
+    | NUMBER MONTH_IDENT YEAR_NUMBER
     {
         $$ = time.Date(atoi($3.literal), MonthIdentHash[strings.ToLower($2.literal)], atoi($1.literal), 0, 0, 0, 0, timezone())
     }
