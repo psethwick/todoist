@@ -22,12 +22,14 @@ import (
 %token<token> DUE CREATED BEFORE AFTER OVER OVERDUE NO DATE TIME LABELS
 %token<token> '#' '@' '\\' '&' '*'
 
+%left STRING
 %left MONTH_IDENT
 %left NUMBER
-%left STRING
-%left '*' '&' '|'
-%left '!' 
+%left '*' 
+%left '&' '|'
 %left '\\'
+%left '(' ')'
+%left '!' 
 
 %%
 
@@ -58,10 +60,6 @@ expr
     | '!' expr
     {
         $$ = NotOpExpr{expr: $2}
-    }
-    | s_string
-    {
-        $$ = $1
     }
     | s_project_key s_string
     {
@@ -135,6 +133,7 @@ expr
     }
     | s_person
     | s_datetime
+    | s_string
 
 s_escaped
     : '\\' '&'
@@ -147,7 +146,7 @@ s_escaped
     }
     | '\\' '|'
     {
-        $$ = "\\|"
+        $$ = `\|`
     }
 
 s_string
@@ -159,13 +158,13 @@ s_string
     {
         $$ = NewStringExpr(".*")
     }
-    | s_string s_string
-    {
-        $$ = $1.(StringExpr).Add($2.(StringExpr))
-    }
     | s_escaped
     {
         $$ = NewStringExpr($1.(string))
+    }
+    | s_string s_string
+    {
+        $$ = $1.(StringExpr).Add($2.(StringExpr))
     }
 
 

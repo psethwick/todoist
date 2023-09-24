@@ -373,6 +373,26 @@ func TestDateTimeElapsedFilter(t *testing.T) {
 	)
 }
 
+func TestParseWildcard(t *testing.T) {
+	assert.Equal(
+		t,
+		ProjectExpr{name: `.*\s?ball`},
+		Filter("#*ball"),
+	)
+
+	assert.Equal(
+		t,
+		ProjectExpr{name: `base\s?.*`},
+		Filter("#base*"),
+	)
+
+	assert.Equal(
+		t,
+		ProjectExpr{name: `b\s?.*\s?ll`},
+		Filter("#b*ll"),
+	)
+}
+
 func TestNoSyntaxErrorAllOfficialExamples(t *testing.T) {
 	tests := []string{
 		"(today | overdue) & #Work",
@@ -400,8 +420,13 @@ func TestNoSyntaxErrorAllOfficialExamples(t *testing.T) {
 		"No priority",
 		"next 5 days",
 		"#multiple words",
-		// "#One \\& Two", // should match a project with literal name "One & Two"
-		//
+		"#One \\& Two",
+		"@*ball",
+		"@home*",
+		"assigned to: m* smith",
+		"#*Work",
+		"Work*",
+		
 		// "due: yesterday, today", // two separate lists ...
 		//
 		// // text contains...
@@ -410,7 +435,7 @@ func TestNoSyntaxErrorAllOfficialExamples(t *testing.T) {
 		// "search: Meeting | search: Work",
 		// "search: email",
 		// "search: http",
-		// "search: http & search:*", // first wildcard...
+		// "search: http & search:*",
 		// // project / sections
 		// "#Work",
 		// "##Work",
@@ -435,11 +460,6 @@ func TestNoSyntaxErrorAllOfficialExamples(t *testing.T) {
 		// "Sunday",
 		//
 		// // wildcards
-		// "@*ball",// will pull up a list of all tasks that have a label that ends with the word “ball”, like @baseball and @football.
-		// "@home*",// See all tasks with any label that starts with “home”. For example, @homework and @homeoffice
-		// "assigned to: m* smith",// See all tasks assigned to anyone whose first name starts with an M and last name is Smith
-		// "#*Work",// See all tasks from projects which name ends with “work”. For example, #Artwork, #Network, and #Work
-		// "Work*",// See all tasks from sections that have the word "Work" in the name. For example, /Work Meetings, /Work Admin, and /Work Calls
 		// "!/*",// See all tasks that don't belong to any section
 	}
 	for _, input := range tests {

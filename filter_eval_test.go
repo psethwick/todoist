@@ -201,8 +201,10 @@ func TestWildcard(t *testing.T) {
 	testFilterEvalWithProject(t, "#baseball", item1, projects, true)
 	testFilterEvalWithProject(t, "#*ball", item1, projects, true)
 	testFilterEvalWithProject(t, "#base*", item1, projects, true)
+	testFilterEvalWithProject(t, "#b*all", item1, projects, true)
 
 	testFilterEvalWithProject(t, "#baseball", item2, projects, false)
 	testFilterEvalWithProject(t, "#*ball", item2, projects, false)
 	testFilterEvalWithProject(t, "#base*", item2, projects, false)
+	testFilterEvalWithProject(t, "#b*ll", item2, projects, false)
 }
