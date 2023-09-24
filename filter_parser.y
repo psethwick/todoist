@@ -167,9 +167,17 @@ s_string
     {
         $$ = NewStringExpr($1.(string))
     }
-    | s_string s_string
+    | STRING s_string
     {
-        $$ = $1.(StringExpr).Add($2.(StringExpr))
+        $$ = NewStringExpr($1.literal).Add($2.(StringExpr))
+    }
+    | '*' s_string
+    {
+        $$ = NewStringExpr(".*").Add($2.(StringExpr))
+    }
+    | s_escaped s_string
+    {
+        $$ = NewStringExpr($1.(string)).Add($2.(StringExpr))
     }
 
 
