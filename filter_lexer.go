@@ -31,6 +31,10 @@ type SubtaskExpr struct{}
 
 type SharedExpr struct{}
 
+type SearchExpr struct {
+	keyword string
+}
+
 type StringExpr struct {
 	words []string
 }
@@ -229,6 +233,8 @@ func (l *Lexer) Lex(lval *yySymType) int {
 			token = PRIORITY
 		} else if lowerToken == "recurring" {
 			token = RECURRING
+		} else if lowerToken == "search" {
+			token = SEARCH
 		} else {
 			token = STRING
 		}

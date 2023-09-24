@@ -49,6 +49,7 @@ const NO = 57372
 const DATE = 57373
 const TIME = 57374
 const LABELS = 57375
+const SEARCH = 57376
 
 var yyToknames = [...]string{
 	"$end",
@@ -84,6 +85,7 @@ var yyToknames = [...]string{
 	"DATE",
 	"TIME",
 	"LABELS",
+	"SEARCH",
 	"'#'",
 	"'@'",
 	"'\\\\'",
@@ -105,7 +107,7 @@ const yyEofCode = 1
 const yyErrCode = 2
 const yyInitialStackSize = 16
 
-//line filter_parser.y:337
+//line filter_parser.y:342
 
 //line yacctab:1
 var yyExca = [...]int8{
@@ -116,112 +118,112 @@ var yyExca = [...]int8{
 
 const yyPrivate = 57344
 
-const yyLast = 123
+const yyLast = 126
 
 var yyAct = [...]int8{
-	60, 21, 70, 72, 21, 21, 46, 47, 48, 20,
-	68, 101, 102, 65, 87, 86, 85, 26, 18, 17,
-	16, 32, 31, 30, 35, 84, 83, 82, 13, 37,
-	38, 39, 71, 12, 69, 15, 14, 72, 61, 24,
-	25, 10, 55, 21, 21, 22, 23, 41, 40, 33,
-	43, 3, 42, 4, 80, 29, 2, 40, 81, 54,
-	44, 45, 31, 30, 35, 43, 71, 42, 50, 37,
-	38, 39, 75, 62, 77, 32, 53, 76, 28, 56,
-	57, 89, 88, 52, 49, 51, 98, 99, 100, 94,
-	104, 103, 95, 96, 97, 29, 92, 40, 91, 78,
-	79, 41, 90, 33, 74, 73, 64, 67, 66, 59,
-	58, 63, 34, 8, 7, 19, 6, 5, 9, 11,
-	27, 36, 1,
+	62, 22, 72, 74, 22, 22, 47, 48, 49, 21,
+	70, 104, 105, 74, 67, 90, 88, 87, 27, 18,
+	17, 16, 33, 32, 31, 36, 86, 85, 84, 13,
+	38, 39, 40, 73, 12, 71, 15, 14, 61, 33,
+	25, 26, 10, 73, 22, 22, 19, 23, 24, 42,
+	41, 34, 44, 3, 43, 4, 2, 30, 63, 41,
+	45, 46, 89, 32, 31, 36, 42, 83, 34, 56,
+	38, 39, 40, 77, 29, 79, 55, 44, 78, 43,
+	92, 82, 57, 58, 64, 91, 97, 107, 101, 102,
+	51, 103, 106, 95, 98, 99, 100, 30, 54, 41,
+	80, 81, 94, 66, 93, 53, 50, 52, 76, 75,
+	69, 68, 60, 59, 65, 35, 8, 7, 20, 6,
+	5, 9, 11, 28, 37, 1,
 }
 
 var yyPact = [...]int16{
-	11, -1000, 28, 11, 11, 65, 65, 65, -1000, -1000,
-	52, -1000, 36, -1000, 16, 53, -1000, -1000, 105, -1000,
-	-1000, 65, 4, -1000, 49, -1000, 107, 2, -1000, 97,
-	96, -11, -1000, -1000, -1000, 94, -1000, -1000, -1000, -1000,
-	93, 35, 11, 11, 13, -1000, 65, 65, 65, -1000,
-	-1000, -1000, -1000, 27, -1000, -16, -17, -18, -27, -28,
-	65, -1000, -1000, -29, -1000, 23, 61, 60, -1000, 91,
-	87, 85, -1000, -1000, 74, -1000, -1000, -1000, -1000, -1000,
-	-1000, -1000, 51, 51, 51, 65, 65, 65, -1000, -1000,
-	-34, -1000, -31, -1000, -1000, -1000, -1000, -1000, 65, 65,
-	65, 80, 79, -1000, -1000,
+	12, -1000, 14, 12, 12, 29, 29, 29, -1000, -1000,
+	74, -1000, 53, -1000, 43, 56, -1000, -1000, 108, -6,
+	-1000, -1000, 29, 23, -1000, 60, -1000, 110, 3, -1000,
+	100, 99, -11, -1000, -1000, -1000, 98, -1000, -1000, -1000,
+	-1000, 97, 35, 12, 12, 39, -1000, 29, 29, 29,
+	-1000, -1000, -1000, -1000, 36, -1000, -16, -17, -18, -27,
+	-28, 29, 29, -1000, -1000, -29, -1000, -1, 64, 59,
+	-1000, 93, 91, 82, -1000, -1000, 71, -1000, -1000, -1000,
+	-1000, -1000, -1000, -1000, 52, 52, 52, 29, 29, 29,
+	29, -1000, -1000, -35, -1000, -32, -1000, -1000, -1000, -1000,
+	-1000, 29, 29, 29, 81, 76, -1000, -1000,
 }
 
 var yyPgo = [...]int8{
-	0, 122, 56, 9, 121, 120, 119, 118, 117, 116,
-	78, 115, 114, 113, 0, 112,
+	0, 125, 56, 9, 124, 123, 122, 121, 120, 119,
+	74, 118, 117, 116, 0, 115,
 }
 
 var yyR1 = [...]int8{
 	0, 1, 1, 2, 2, 2, 2, 2, 2, 2,
 	2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
-	2, 2, 2, 2, 2, 2, 15, 15, 15, 14,
-	14, 14, 14, 11, 11, 11, 9, 8, 12, 13,
-	7, 7, 6, 6, 3, 3, 3, 3, 3, 3,
-	5, 5, 5, 5, 5, 5, 5, 4, 4, 4,
-	10, 10, 10, 10,
+	2, 2, 2, 2, 2, 2, 2, 15, 15, 15,
+	14, 14, 14, 14, 11, 11, 11, 9, 8, 12,
+	13, 7, 7, 6, 6, 3, 3, 3, 3, 3,
+	3, 5, 5, 5, 5, 5, 5, 5, 4, 4,
+	4, 10, 10, 10, 10,
 }
 
 var yyR2 = [...]int8{
 	0, 0, 1, 3, 3, 3, 2, 2, 2, 2,
 	1, 1, 2, 2, 1, 2, 1, 4, 4, 4,
-	1, 1, 1, 1, 1, 1, 2, 2, 2, 1,
-	1, 1, 2, 4, 4, 4, 2, 1, 1, 2,
-	2, 3, 2, 1, 2, 1, 1, 3, 3, 2,
-	5, 3, 3, 1, 1, 1, 1, 2, 2, 3,
-	3, 5, 3, 2,
+	1, 1, 1, 3, 1, 1, 1, 2, 2, 2,
+	1, 1, 1, 2, 4, 4, 4, 2, 1, 1,
+	2, 2, 3, 2, 1, 2, 1, 1, 3, 3,
+	2, 5, 3, 3, 1, 1, 1, 1, 2, 2,
+	3, 3, 5, 3, 2,
 }
 
 var yyChk = [...]int16{
-	-1000, -1, -2, 40, 42, -8, -9, -12, -13, -7,
-	30, -6, 22, 17, 25, 24, 9, 8, 7, -11,
-	-3, -14, 34, 35, 28, 29, 6, -5, -10, 44,
-	12, 11, 10, 38, -15, 13, -4, 18, 19, 20,
-	46, 36, 39, 37, -2, -2, -14, -14, -14, 32,
-	16, 33, 31, 24, 23, 26, 26, 27, 5, 4,
-	-14, 34, 24, 4, -10, 11, 11, 11, 21, 45,
-	13, 43, 14, 11, 11, 37, 42, 39, -2, -2,
-	41, 31, 43, 43, 43, 43, 43, 43, 21, 21,
-	11, 11, 11, 11, 15, -3, -3, -3, -14, -14,
-	-14, 45, 43, 11, 11,
+	-1000, -1, -2, 41, 43, -8, -9, -12, -13, -7,
+	30, -6, 22, 17, 25, 24, 9, 8, 7, 34,
+	-11, -3, -14, 35, 36, 28, 29, 6, -5, -10,
+	45, 12, 11, 10, 39, -15, 13, -4, 18, 19,
+	20, 47, 37, 40, 38, -2, -2, -14, -14, -14,
+	32, 16, 33, 31, 24, 23, 26, 26, 27, 5,
+	4, 44, -14, 35, 24, 4, -10, 11, 11, 11,
+	21, 46, 13, 44, 14, 11, 11, 38, 43, 40,
+	-2, -2, 42, 31, 44, 44, 44, 44, 44, -14,
+	44, 21, 21, 11, 11, 11, 11, 15, -3, -3,
+	-3, -14, -14, -14, 46, 44, 11, 11,
 }
 
 var yyDef = [...]int8{
 	1, -2, 2, 0, 0, 0, 0, 0, 10, 11,
-	0, 14, 0, 16, 0, 0, 20, 21, 22, 23,
-	24, 25, 37, 38, 0, 43, 0, 45, 46, 0,
-	0, 0, 29, 30, 31, 0, 53, 54, 55, 56,
-	0, 0, 0, 0, 0, 6, 7, 8, 9, 12,
-	13, 39, 40, 0, 15, 0, 0, 0, 0, 0,
-	32, 36, 42, 0, 44, 0, 0, 0, 49, 0,
-	58, 0, 63, 57, 0, 26, 27, 28, 3, 4,
-	5, 41, 0, 0, 0, 0, 0, 0, 47, 48,
-	59, 52, 60, 51, 62, 17, 18, 19, 33, 34,
-	35, 0, 0, 50, 61,
+	0, 14, 0, 16, 0, 0, 20, 21, 22, 0,
+	24, 25, 26, 38, 39, 0, 44, 0, 46, 47,
+	0, 0, 0, 30, 31, 32, 0, 54, 55, 56,
+	57, 0, 0, 0, 0, 0, 6, 7, 8, 9,
+	12, 13, 40, 41, 0, 15, 0, 0, 0, 0,
+	0, 0, 33, 37, 43, 0, 45, 0, 0, 0,
+	50, 0, 59, 0, 64, 58, 0, 27, 28, 29,
+	3, 4, 5, 42, 0, 0, 0, 0, 0, 23,
+	0, 48, 49, 60, 53, 61, 52, 63, 17, 18,
+	19, 34, 35, 36, 0, 0, 51, 62,
 }
 
 var yyTok1 = [...]int8{
 	1, 3, 3, 3, 3, 3, 3, 3, 3, 3,
 	3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
 	3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
-	3, 3, 3, 42, 3, 34, 3, 3, 37, 3,
-	40, 41, 38, 46, 3, 44, 3, 45, 3, 3,
-	3, 3, 3, 3, 3, 3, 3, 3, 43, 3,
-	3, 3, 3, 3, 35, 3, 3, 3, 3, 3,
+	3, 3, 3, 43, 3, 35, 3, 3, 38, 3,
+	41, 42, 39, 47, 3, 45, 3, 46, 3, 3,
+	3, 3, 3, 3, 3, 3, 3, 3, 44, 3,
+	3, 3, 3, 3, 36, 3, 3, 3, 3, 3,
 	3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
 	3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
-	3, 3, 36, 3, 3, 3, 3, 3, 3, 3,
+	3, 3, 37, 3, 3, 3, 3, 3, 3, 3,
 	3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
 	3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
-	3, 3, 3, 3, 39,
+	3, 3, 3, 3, 40,
 }
 
 var yyTok2 = [...]int8{
 	2, 3, 4, 5, 6, 7, 8, 9, 10, 11,
 	12, 13, 14, 15, 16, 17, 18, 19, 20, 21,
 	22, 23, 24, 25, 26, 27, 28, 29, 30, 31,
-	32, 33,
+	32, 33, 34,
 }
 
 var yyTok3 = [...]int8{
@@ -567,104 +569,104 @@ yydefault:
 
 	case 1:
 		yyDollar = yyS[yypt-0 : yypt+1]
-//line filter_parser.y:38
+//line filter_parser.y:39
 		{
 			yyVAL.expr = VoidExpr{}
 		}
 	case 2:
 		yyDollar = yyS[yypt-1 : yypt+1]
-//line filter_parser.y:42
+//line filter_parser.y:43
 		{
 			yyVAL.expr = yyDollar[1].expr
 			yylex.(*Lexer).result = yyVAL.expr
 		}
 	case 3:
 		yyDollar = yyS[yypt-3 : yypt+1]
-//line filter_parser.y:49
+//line filter_parser.y:50
 		{
 			yyVAL.expr = BoolInfixOpExpr{left: yyDollar[1].expr, operator: '|', right: yyDollar[3].expr}
 		}
 	case 4:
 		yyDollar = yyS[yypt-3 : yypt+1]
-//line filter_parser.y:53
+//line filter_parser.y:54
 		{
 			yyVAL.expr = BoolInfixOpExpr{left: yyDollar[1].expr, operator: '&', right: yyDollar[3].expr}
 		}
 	case 5:
 		yyDollar = yyS[yypt-3 : yypt+1]
-//line filter_parser.y:57
+//line filter_parser.y:58
 		{
 			yyVAL.expr = yyDollar[2].expr
 		}
 	case 6:
 		yyDollar = yyS[yypt-2 : yypt+1]
-//line filter_parser.y:61
+//line filter_parser.y:62
 		{
 			yyVAL.expr = NotOpExpr{expr: yyDollar[2].expr}
 		}
 	case 7:
 		yyDollar = yyS[yypt-2 : yypt+1]
-//line filter_parser.y:65
+//line filter_parser.y:66
 		{
 			yyVAL.expr = ProjectExpr{isAll: false, name: yyDollar[2].expr.(StringExpr).String()}
 		}
 	case 8:
 		yyDollar = yyS[yypt-2 : yypt+1]
-//line filter_parser.y:69
+//line filter_parser.y:70
 		{
 			yyVAL.expr = ProjectExpr{isAll: true, name: yyDollar[2].expr.(StringExpr).String()}
 		}
 	case 9:
 		yyDollar = yyS[yypt-2 : yypt+1]
-//line filter_parser.y:73
+//line filter_parser.y:74
 		{
 			yyVAL.expr = LabelExpr{name: yyDollar[2].expr.(StringExpr).String()}
 		}
 	case 10:
 		yyDollar = yyS[yypt-1 : yypt+1]
-//line filter_parser.y:77
+//line filter_parser.y:78
 		{
 			yyVAL.expr = LabelExpr{name: ""}
 		}
 	case 11:
 		yyDollar = yyS[yypt-1 : yypt+1]
-//line filter_parser.y:81
+//line filter_parser.y:82
 		{
 			yyVAL.expr = DateExpr{operation: NO_DUE_DATE}
 		}
 	case 12:
 		yyDollar = yyS[yypt-2 : yypt+1]
-//line filter_parser.y:85
+//line filter_parser.y:86
 		{
 			yyVAL.expr = DateExpr{operation: NO_TIME}
 		}
 	case 13:
 		yyDollar = yyS[yypt-2 : yypt+1]
-//line filter_parser.y:89
+//line filter_parser.y:90
 		{
 			yyVAL.expr = NoPriorityExpr{}
 		}
 	case 14:
 		yyDollar = yyS[yypt-1 : yypt+1]
-//line filter_parser.y:93
+//line filter_parser.y:94
 		{
 			yyVAL.expr = DateExpr{allDay: false, datetime: now(), operation: DUE_BEFORE}
 		}
 	case 15:
 		yyDollar = yyS[yypt-2 : yypt+1]
-//line filter_parser.y:97
+//line filter_parser.y:98
 		{
 			yyVAL.expr = ViewAllExpr{}
 		}
 	case 16:
 		yyDollar = yyS[yypt-1 : yypt+1]
-//line filter_parser.y:101
+//line filter_parser.y:102
 		{
 			yyVAL.expr = RecurringExpr{}
 		}
 	case 17:
 		yyDollar = yyS[yypt-4 : yypt+1]
-//line filter_parser.y:105
+//line filter_parser.y:106
 		{
 			e := yyDollar[4].expr.(DateExpr)
 			e.operation = CREATED_BEFORE
@@ -672,7 +674,7 @@ yydefault:
 		}
 	case 18:
 		yyDollar = yyS[yypt-4 : yypt+1]
-//line filter_parser.y:111
+//line filter_parser.y:112
 		{
 			e := yyDollar[4].expr.(DateExpr)
 			e.operation = DUE_BEFORE
@@ -680,7 +682,7 @@ yydefault:
 		}
 	case 19:
 		yyDollar = yyS[yypt-4 : yypt+1]
-//line filter_parser.y:117
+//line filter_parser.y:118
 		{
 			e := yyDollar[4].expr.(DateExpr)
 			e.operation = DUE_AFTER
@@ -688,147 +690,153 @@ yydefault:
 		}
 	case 20:
 		yyDollar = yyS[yypt-1 : yypt+1]
-//line filter_parser.y:123
+//line filter_parser.y:124
 		{
 			yyVAL.expr = SharedExpr{}
 		}
 	case 21:
 		yyDollar = yyS[yypt-1 : yypt+1]
-//line filter_parser.y:127
+//line filter_parser.y:128
 		{
 			yyVAL.expr = SubtaskExpr{}
 		}
 	case 22:
 		yyDollar = yyS[yypt-1 : yypt+1]
-//line filter_parser.y:131
+//line filter_parser.y:132
 		{
 			yyVAL.expr = AssignedExpr{}
 		}
-	case 26:
-		yyDollar = yyS[yypt-2 : yypt+1]
-//line filter_parser.y:140
+	case 23:
+		yyDollar = yyS[yypt-3 : yypt+1]
+//line filter_parser.y:136
 		{
-			yyVAL.expr = "&"
+			yyVAL.expr = SearchExpr{keyword: yyDollar[3].expr.(StringExpr).String()}
 		}
 	case 27:
 		yyDollar = yyS[yypt-2 : yypt+1]
-//line filter_parser.y:144
+//line filter_parser.y:145
 		{
-			yyVAL.expr = "!"
+			yyVAL.expr = "&"
 		}
 	case 28:
 		yyDollar = yyS[yypt-2 : yypt+1]
-//line filter_parser.y:148
+//line filter_parser.y:149
+		{
+			yyVAL.expr = "!"
+		}
+	case 29:
+		yyDollar = yyS[yypt-2 : yypt+1]
+//line filter_parser.y:153
 		{
 			yyVAL.expr = `\|`
 		}
-	case 29:
+	case 30:
 		yyDollar = yyS[yypt-1 : yypt+1]
-//line filter_parser.y:154
+//line filter_parser.y:159
 		{
 			yyVAL.expr = NewStringExpr(yyDollar[1].token.literal)
 		}
-	case 30:
+	case 31:
 		yyDollar = yyS[yypt-1 : yypt+1]
-//line filter_parser.y:158
+//line filter_parser.y:163
 		{
 			yyVAL.expr = NewStringExpr(".*")
 		}
-	case 31:
+	case 32:
 		yyDollar = yyS[yypt-1 : yypt+1]
-//line filter_parser.y:162
+//line filter_parser.y:167
 		{
 			yyVAL.expr = NewStringExpr(yyDollar[1].expr.(string))
 		}
-	case 32:
+	case 33:
 		yyDollar = yyS[yypt-2 : yypt+1]
-//line filter_parser.y:166
+//line filter_parser.y:171
 		{
 			yyVAL.expr = yyDollar[1].expr.(StringExpr).Add(yyDollar[2].expr.(StringExpr))
 		}
-	case 33:
+	case 34:
 		yyDollar = yyS[yypt-4 : yypt+1]
-//line filter_parser.y:173
+//line filter_parser.y:178
 		{
 			yyVAL.expr = PersonExpr{operation: ASSIGNED_TO, person: yyDollar[4].expr.(StringExpr).String()}
 		}
-	case 34:
+	case 35:
 		yyDollar = yyS[yypt-4 : yypt+1]
-//line filter_parser.y:177
+//line filter_parser.y:182
 		{
 			yyVAL.expr = PersonExpr{operation: ASSIGNED_BY, person: yyDollar[4].expr.(StringExpr).String()}
 		}
-	case 35:
+	case 36:
 		yyDollar = yyS[yypt-4 : yypt+1]
-//line filter_parser.y:181
+//line filter_parser.y:186
 		{
 			yyVAL.expr = PersonExpr{operation: ADDED_BY, person: yyDollar[4].expr.(StringExpr).String()}
 		}
-	case 36:
-		yyDollar = yyS[yypt-2 : yypt+1]
-//line filter_parser.y:187
-		{
-			yyVAL.expr = yyDollar[1].token
-		}
 	case 37:
-		yyDollar = yyS[yypt-1 : yypt+1]
-//line filter_parser.y:193
+		yyDollar = yyS[yypt-2 : yypt+1]
+//line filter_parser.y:192
 		{
 			yyVAL.expr = yyDollar[1].token
 		}
 	case 38:
 		yyDollar = yyS[yypt-1 : yypt+1]
-//line filter_parser.y:199
+//line filter_parser.y:198
 		{
 			yyVAL.expr = yyDollar[1].token
 		}
 	case 39:
-		yyDollar = yyS[yypt-2 : yypt+1]
-//line filter_parser.y:205
+		yyDollar = yyS[yypt-1 : yypt+1]
+//line filter_parser.y:204
 		{
 			yyVAL.expr = yyDollar[1].token
 		}
 	case 40:
 		yyDollar = yyS[yypt-2 : yypt+1]
-//line filter_parser.y:211
+//line filter_parser.y:210
 		{
 			yyVAL.expr = yyDollar[1].token
 		}
 	case 41:
-		yyDollar = yyS[yypt-3 : yypt+1]
-//line filter_parser.y:215
+		yyDollar = yyS[yypt-2 : yypt+1]
+//line filter_parser.y:216
 		{
 			yyVAL.expr = yyDollar[1].token
 		}
 	case 42:
-		yyDollar = yyS[yypt-2 : yypt+1]
-//line filter_parser.y:221
+		yyDollar = yyS[yypt-3 : yypt+1]
+//line filter_parser.y:220
 		{
 			yyVAL.expr = yyDollar[1].token
 		}
 	case 43:
-		yyDollar = yyS[yypt-1 : yypt+1]
-//line filter_parser.y:225
+		yyDollar = yyS[yypt-2 : yypt+1]
+//line filter_parser.y:226
 		{
 			yyVAL.expr = yyDollar[1].token
 		}
 	case 44:
+		yyDollar = yyS[yypt-1 : yypt+1]
+//line filter_parser.y:230
+		{
+			yyVAL.expr = yyDollar[1].token
+		}
+	case 45:
 		yyDollar = yyS[yypt-2 : yypt+1]
-//line filter_parser.y:232
+//line filter_parser.y:237
 		{
 			date := yyDollar[1].expr.(time.Time)
 			time := yyDollar[2].expr.(time.Duration)
 			yyVAL.expr = DateExpr{allDay: false, datetime: date.Add(time)}
 		}
-	case 45:
+	case 46:
 		yyDollar = yyS[yypt-1 : yypt+1]
-//line filter_parser.y:238
+//line filter_parser.y:243
 		{
 			yyVAL.expr = DateExpr{allDay: true, datetime: yyDollar[1].expr.(time.Time)}
 		}
-	case 46:
+	case 47:
 		yyDollar = yyS[yypt-1 : yypt+1]
-//line filter_parser.y:242
+//line filter_parser.y:247
 		{
 			nd := now().Sub(today())
 			d := yyDollar[1].expr.(time.Duration)
@@ -837,48 +845,48 @@ yydefault:
 			}
 			yyVAL.expr = DateExpr{allDay: false, datetime: today().Add(d)}
 		}
-	case 47:
-		yyDollar = yyS[yypt-3 : yypt+1]
-//line filter_parser.y:251
-		{
-			date := today().AddDate(0, 0, -atoi(yyDollar[2].token.literal))
-			yyVAL.expr = DateExpr{allDay: true, datetime: date, operation: DUE_BEFORE}
-		}
 	case 48:
 		yyDollar = yyS[yypt-3 : yypt+1]
 //line filter_parser.y:256
 		{
-			date := today().AddDate(0, 0, atoi(yyDollar[2].token.literal))
+			date := today().AddDate(0, 0, -atoi(yyDollar[2].token.literal))
 			yyVAL.expr = DateExpr{allDay: true, datetime: date, operation: DUE_BEFORE}
 		}
 	case 49:
-		yyDollar = yyS[yypt-2 : yypt+1]
+		yyDollar = yyS[yypt-3 : yypt+1]
 //line filter_parser.y:261
+		{
+			date := today().AddDate(0, 0, atoi(yyDollar[2].token.literal))
+			yyVAL.expr = DateExpr{allDay: true, datetime: date, operation: DUE_BEFORE}
+		}
+	case 50:
+		yyDollar = yyS[yypt-2 : yypt+1]
+//line filter_parser.y:266
 		{
 			date := today().AddDate(0, 0, atoi(yyDollar[1].token.literal))
 			yyVAL.expr = DateExpr{allDay: true, datetime: date, operation: DUE_BEFORE}
 		}
-	case 50:
+	case 51:
 		yyDollar = yyS[yypt-5 : yypt+1]
-//line filter_parser.y:268
+//line filter_parser.y:273
 		{
 			yyVAL.expr = time.Date(atoi(yyDollar[5].token.literal), time.Month(atoi(yyDollar[1].token.literal)), atoi(yyDollar[3].token.literal), 0, 0, 0, 0, timezone())
 		}
-	case 51:
+	case 52:
 		yyDollar = yyS[yypt-3 : yypt+1]
-//line filter_parser.y:272
+//line filter_parser.y:277
 		{
 			yyVAL.expr = time.Date(atoi(yyDollar[3].token.literal), MonthIdentHash[strings.ToLower(yyDollar[1].token.literal)], atoi(yyDollar[2].token.literal), 0, 0, 0, 0, timezone())
 		}
-	case 52:
+	case 53:
 		yyDollar = yyS[yypt-3 : yypt+1]
-//line filter_parser.y:276
+//line filter_parser.y:281
 		{
 			yyVAL.expr = time.Date(atoi(yyDollar[3].token.literal), MonthIdentHash[strings.ToLower(yyDollar[2].token.literal)], atoi(yyDollar[1].token.literal), 0, 0, 0, 0, timezone())
 		}
-	case 53:
+	case 54:
 		yyDollar = yyS[yypt-1 : yypt+1]
-//line filter_parser.y:280
+//line filter_parser.y:285
 		{
 			tod := today()
 			date := yyDollar[1].expr.(time.Time)
@@ -887,63 +895,63 @@ yydefault:
 			}
 			yyVAL.expr = date
 		}
-	case 54:
+	case 55:
 		yyDollar = yyS[yypt-1 : yypt+1]
-//line filter_parser.y:289
+//line filter_parser.y:294
 		{
 			yyVAL.expr = today()
 		}
-	case 55:
+	case 56:
 		yyDollar = yyS[yypt-1 : yypt+1]
-//line filter_parser.y:293
+//line filter_parser.y:298
 		{
 			yyVAL.expr = today().AddDate(0, 0, 1)
 		}
-	case 56:
+	case 57:
 		yyDollar = yyS[yypt-1 : yypt+1]
-//line filter_parser.y:297
+//line filter_parser.y:302
 		{
 			yyVAL.expr = today().AddDate(0, 0, -1)
 		}
-	case 57:
+	case 58:
 		yyDollar = yyS[yypt-2 : yypt+1]
-//line filter_parser.y:303
+//line filter_parser.y:308
 		{
 			yyVAL.expr = time.Date(today().Year(), MonthIdentHash[strings.ToLower(yyDollar[1].token.literal)], atoi(yyDollar[2].token.literal), 0, 0, 0, 0, timezone())
 		}
-	case 58:
+	case 59:
 		yyDollar = yyS[yypt-2 : yypt+1]
-//line filter_parser.y:307
+//line filter_parser.y:312
 		{
 			yyVAL.expr = time.Date(today().Year(), MonthIdentHash[strings.ToLower(yyDollar[2].token.literal)], atoi(yyDollar[1].token.literal), 0, 0, 0, 0, timezone())
 		}
-	case 59:
+	case 60:
 		yyDollar = yyS[yypt-3 : yypt+1]
-//line filter_parser.y:311
+//line filter_parser.y:316
 		{
 			yyVAL.expr = time.Date(now().Year(), time.Month(atoi(yyDollar[3].token.literal)), atoi(yyDollar[1].token.literal), 0, 0, 0, 0, timezone())
 		}
-	case 60:
+	case 61:
 		yyDollar = yyS[yypt-3 : yypt+1]
-//line filter_parser.y:317
+//line filter_parser.y:322
 		{
 			yyVAL.expr = time.Duration(int64(time.Hour)*int64(atoi(yyDollar[1].token.literal)) + int64(time.Minute)*int64(atoi(yyDollar[3].token.literal)))
 		}
-	case 61:
+	case 62:
 		yyDollar = yyS[yypt-5 : yypt+1]
-//line filter_parser.y:321
+//line filter_parser.y:326
 		{
 			yyVAL.expr = time.Duration(int64(time.Hour)*int64(atoi(yyDollar[1].token.literal)) + int64(time.Minute)*int64(atoi(yyDollar[3].token.literal)) + int64(time.Second)*int64(atoi(yyDollar[5].token.literal)))
 		}
-	case 62:
+	case 63:
 		yyDollar = yyS[yypt-3 : yypt+1]
-//line filter_parser.y:325
+//line filter_parser.y:330
 		{
 			yyVAL.expr = time.Duration(int64(time.Hour) * int64(atoi(yyDollar[2].token.literal)))
 		}
-	case 63:
+	case 64:
 		yyDollar = yyS[yypt-2 : yypt+1]
-//line filter_parser.y:329
+//line filter_parser.y:334
 		{
 			hour := atoi(yyDollar[1].token.literal)
 			if TwelveClockIdentHash[yyDollar[2].token.literal] {

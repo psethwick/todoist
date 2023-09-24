@@ -426,16 +426,17 @@ func TestNoSyntaxErrorAllOfficialExamples(t *testing.T) {
 		"assigned to: m* smith",
 		"#*Work",
 		"Work*",
+
+		"search: Meeting",
+		"search: Meeting & today",
+		"search: Meeting | search: Work",
+		"search: email",
+		"search: http",
+		"search: http & search:*",
 		
 		// "due: yesterday, today", // two separate lists ...
 		//
 		// // text contains...
-		// "search: Meeting",
-		// "search: Meeting & today",
-		// "search: Meeting | search: Work",
-		// "search: email",
-		// "search: http",
-		// "search: http & search:*",
 		// // project / sections
 		// "#Work",
 		// "##Work",

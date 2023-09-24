@@ -20,6 +20,7 @@ import (
 %token<token> MONTH_IDENT TWELVE_CLOCK_IDENT HOURS PRIORITY RECURRING
 %token<token> TODAY_IDENT TOMORROW_IDENT YESTERDAY_IDENT DAYS VIEW ALL
 %token<token> DUE CREATED BEFORE AFTER OVER OVERDUE NO DATE TIME LABELS
+%token<token> SEARCH
 %token<token> '#' '@' '\\' '&' '*'
 
 %left STRING
@@ -130,6 +131,10 @@ expr
     | ASSIGNED
     {
         $$ = AssignedExpr{}
+    }
+    | SEARCH ':' s_string
+    {
+        $$ = SearchExpr{keyword: $3.(StringExpr).String()}
     }
     | s_person
     | s_datetime
