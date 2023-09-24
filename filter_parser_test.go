@@ -391,6 +391,12 @@ func TestParseWildcard(t *testing.T) {
 		ProjectExpr{name: `b\s?.*\s?ll`},
 		Filter("#b*ll"),
 	)
+
+	assert.Equal(
+		t,
+		ProjectExpr{name: `b\s?.*\s?all`},
+		Filter("#b*all"),
+	)
 }
 
 func TestWeekday(t *testing.T) {

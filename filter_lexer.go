@@ -7,11 +7,13 @@ import (
 	"time"
 )
 
-type Expression interface{}
-type Token struct {
-	token   int
-	literal string
-}
+type (
+	Expression interface{}
+	Token      struct {
+		token   int
+		literal string
+	}
+)
 
 type ErrorExpr struct {
 	error string
@@ -119,10 +121,13 @@ func atoi(a string) (i int) {
 	return
 }
 
-var now = time.Now
-var today = func() time.Time {
-	return time.Date(now().Year(), now().Month(), now().Day(), 0, 0, 0, 0, now().Location())
-}
+var (
+	now   = time.Now
+	today = func() time.Time {
+		return time.Date(now().Year(), now().Month(), now().Day(), 0, 0, 0, 0, now().Location())
+	}
+)
+
 var timezone = func() *time.Location {
 	return now().Location()
 }
@@ -130,6 +135,7 @@ var timezone = func() *time.Location {
 type Lexer struct {
 	scanner.Scanner
 	result Expression
+	last   int
 }
 
 var MonthIdentHash = map[string]time.Month{
@@ -220,31 +226,59 @@ func (l *Lexer) Lex(lval *yySymType) int {
 		} else if lowerToken == "next" {
 			token = NEXT
 		} else if lowerToken == "before" {
-			token = BEFORE
+			if l.last == DUE || l.last == CREATED {
+				token = BEFORE
+			} else {
+				token = STRING
+			}
 		} else if lowerToken == "after" {
-			token = AFTER
+			if l.last == DUE {
+				token = AFTER
+			} else {
+				token = STRING
+			}
 		} else if lowerToken == "over" {
 			token = OVER
 		} else if lowerToken == "no" {
 			token = NO
 		} else if lowerToken == "time" {
-			token = TIME
+			if l.last == NO {
+				token = TIME
+			} else {
+				token = STRING
+			}
 		} else if lowerToken == "date" {
-			token = DATE
+			if l.last == NO || l.last == DUE {
+				token = DATE
+			} else {
+				token = STRING
+			}
 		} else if lowerToken == "labels" {
-			token = LABELS
+			if l.last == NO {
+				token = LABELS
+			} else {
+				token = STRING
+			}
 		} else if lowerToken == "view" {
 			token = VIEW
 		} else if lowerToken == "all" {
-			token = ALL
-		} else if lowerToken == "to" {
-			token = TO
-		} else if lowerToken == "by" {
-			token = BY
+			if l.last == VIEW {
+				token = ALL
+			} else {
+				token = STRING
+			}
 		} else if lowerToken == "added" {
 			token = ADDED
 		} else if lowerToken == "assigned" {
 			token = ASSIGNED
+		} else if lowerToken == "to" {
+			token = TO
+		} else if lowerToken == "by" {
+			if l.last == ASSIGNED || l.last == ADDED {
+				token = BY
+			} else {
+				token = STRING
+			}
 		} else if lowerToken == "days" {
 			token = DAYS
 		} else if lowerToken == "hours" {
@@ -256,7 +290,11 @@ func (l *Lexer) Lex(lval *yySymType) int {
 		} else if lowerToken == "subtask" {
 			token = SUBTASK
 		} else if lowerToken == "priority" {
-			token = PRIORITY
+			if l.last == NO {
+				token = PRIORITY
+			} else {
+				token = STRING
+			}
 		} else if lowerToken == "recurring" {
 			token = RECURRING
 		} else if lowerToken == "search" {
@@ -273,6 +311,7 @@ func (l *Lexer) Lex(lval *yySymType) int {
 		}
 	}
 	lval.token = Token{token: token, literal: l.TokenText()}
+	l.last = token
 	return token
 }
 
@@ -283,7 +322,7 @@ func (l *Lexer) Error(e string) {
 func Filter(f string) (e Expression) {
 	l := new(Lexer)
 	l.Init(strings.NewReader(f))
-	// important to exclude scanner.ScanFloats because afternoon times in am/pm format trigger float parsing
+	// exclude scanner.ScanFloats because afternoon times in am/pm format trigger float parsing
 	l.Mode = scanner.ScanIdents | scanner.ScanInts
 	yyParse(l)
 	return l.result
