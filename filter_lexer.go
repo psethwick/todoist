@@ -32,7 +32,22 @@ type SubtaskExpr struct{}
 type SharedExpr struct{}
 
 type StringExpr struct {
-	literal string
+	words []string
+}
+
+func NewStringExpr(strs ...string) StringExpr {
+	return StringExpr{
+		words: strs,
+	}
+}
+
+func (se StringExpr) Add(other StringExpr) StringExpr {
+	se.words = append(se.words, other.words...)
+	return se
+}
+
+func (se StringExpr) String() string {
+	return strings.Join(se.words, "\\s?")
 }
 
 type personOperation int
@@ -43,11 +58,12 @@ const (
 	ADDED_BY
 )
 
- // A collaborator can be identified by:
- //    The person’s email
- //    The person’s full name
- //    “Me” (referring to yourself)
- //    “Others” (referring to all users other than yourself)
+// A collaborator can be identified by:
+//
+//	The person’s email
+//	The person’s full name
+//	“Me” (referring to yourself)
+//	“Others” (referring to all users other than yourself)
 type PersonExpr struct {
 	person    string
 	operation personOperation

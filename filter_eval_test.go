@@ -178,3 +178,31 @@ func TestDueAfterEval(t *testing.T) {
 
 	testFilterEval(t, "due after: 10/2/2017 13:00", todoist.Item{Due: nil}, false) // JST: Mon 2 Oct 2017 13:01:00
 }
+
+func TestWildcard(t *testing.T) {
+	projects := todoist.Projects{
+		todoist.Project{
+			HaveID: todoist.HaveID{ID: "1"},
+			Name:   "baseball",
+		},
+		todoist.Project{
+			HaveID:       todoist.HaveID{ID: "2"},
+			HaveParentID: todoist.HaveParentID{ParentID: &[]string{"1"}[0]},
+			Name:         "other",
+		},
+	}
+
+	item1 := todoist.Item{}
+	item1.ProjectID = "1"
+
+	item2 := todoist.Item{}
+	item2.ProjectID = "2"
+
+	testFilterEvalWithProject(t, "#baseball", item1, projects, true)
+	testFilterEvalWithProject(t, "#*ball", item1, projects, true)
+	testFilterEvalWithProject(t, "#base*", item1, projects, true)
+
+	testFilterEvalWithProject(t, "#baseball", item2, projects, false)
+	testFilterEvalWithProject(t, "#*ball", item2, projects, false)
+	testFilterEvalWithProject(t, "#base*", item2, projects, false)
+}

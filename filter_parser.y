@@ -3,7 +3,6 @@ package main
 
 import (
     "time"
-    "fmt"
     "strings"
 )
 %}
@@ -66,15 +65,15 @@ expr
     }
     | s_project_key s_string
     {
-        $$ = ProjectExpr{isAll: false, name: $2.(StringExpr).literal}
+        $$ = ProjectExpr{isAll: false, name: $2.(StringExpr).String()}
     }
     | s_project_all_key s_string
     {
-        $$ = ProjectExpr{isAll: true, name: $2.(StringExpr).literal}
+        $$ = ProjectExpr{isAll: true, name: $2.(StringExpr).String()}
     }
     | s_label_key s_string
     {
-        $$ = LabelExpr{name: $2.(StringExpr).literal}
+        $$ = LabelExpr{name: $2.(StringExpr).String()}
     }
     | s_no_labels
     {
@@ -148,48 +147,40 @@ s_escaped
     }
     | '\\' '|'
     {
-        $$ = "|"
+        $$ = "\\|"
     }
 
 s_string
     : STRING
     {
-        $$ = StringExpr{literal:$1.literal}
+        $$ = NewStringExpr($1.literal)
     }
-    | '*' STRING
+    | '*'
     {
-        $$ = StringExpr{literal:fmt.Sprintf("*%s", $2.literal)}
+        $$ = NewStringExpr(".*")
     }
-    | STRING '*'
+    | s_string s_string
     {
-        $$ = StringExpr{literal:fmt.Sprintf("%s*", $1.literal)}
+        $$ = $1.(StringExpr).Add($2.(StringExpr))
     }
-    | s_string STRING
+    | s_escaped
     {
-        $$ = StringExpr{literal:fmt.Sprintf("%s %s", $1.(StringExpr).literal, $2.literal)}
-    }
-    | s_escaped STRING
-    {
-        $$ = StringExpr{literal:fmt.Sprintf("%s %s", $1, $2.literal)}
-    }
-    | STRING s_escaped
-    {
-        $$ = StringExpr{literal:fmt.Sprintf("%s %s", $1.literal, $2)}
+        $$ = NewStringExpr($1.(string))
     }
 
 
 s_person
     : ASSIGNED TO ':' s_string
     {
-        $$ = PersonExpr{operation: ASSIGNED_TO, person:$4.(StringExpr).literal}
+        $$ = PersonExpr{operation: ASSIGNED_TO, person:$4.(StringExpr).String()}
     }
     | ASSIGNED BY ':' s_string
     {
-        $$ = PersonExpr{operation: ASSIGNED_BY, person:$4.(StringExpr).literal}
+        $$ = PersonExpr{operation: ASSIGNED_BY, person:$4.(StringExpr).String()}
     }
     | ADDED BY ':' s_string
     {
-        $$ = PersonExpr{operation: ADDED_BY, person:$4.(StringExpr).literal}
+        $$ = PersonExpr{operation: ADDED_BY, person:$4.(StringExpr).String()}
     }
    
 s_project_all_key

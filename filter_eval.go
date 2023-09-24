@@ -102,8 +102,9 @@ func EvalDate(e DateExpr, item todoist.AbstractItem) (result bool) {
 	}
 }
 
+// todo maybe priority should have it's own expr
 func EvalAsPriority(e StringExpr, item *todoist.Item) (result bool) {
-	matched := priorityRegex.FindStringSubmatch(e.literal)
+	matched := priorityRegex.FindStringSubmatch(e.String())
 	if len(matched) == 0 {
 		return false
 	} else {

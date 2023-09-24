@@ -13,7 +13,7 @@ func TestFilter(t *testing.T) {
 }
 
 func TestPriorityFilter(t *testing.T) {
-	assert.Equal(t, StringExpr{literal: "p1"}, Filter("p1"), "they should be equal")
+	assert.Equal(t, StringExpr{words: []string{"p1"}}, Filter("p1"), "they should be equal")
 	assert.Equal(t, NoPriorityExpr{}, Filter("No priority"), "they should be equal")
 }
 
@@ -28,14 +28,14 @@ func TestProjectFilter(t *testing.T) {
 	assert.Equal(t,
 		ProjectExpr{
 			isAll: false,
-			name:  "Work work",
+			name:  `Work\s?work`,
 		},
 		Filter("#Work work"), "they should be equal")
 
 	assert.Equal(t,
 		ProjectExpr{
 			isAll: false,
-			name:  "Work work work",
+			name:  `Work\s?work\s?work`,
 		},
 		Filter("#Work work work"), "they should be equal")
 
@@ -49,46 +49,49 @@ func TestProjectFilter(t *testing.T) {
 	assert.Equal(t,
 		ProjectExpr{
 			isAll: false,
-			name: "One & Two",
+			name:  `One\s?&\s?Two`,
 		},
-		Filter("#One \\& Two"), "they should be equal")
-	
-	assert.Equal(t,
-		ProjectExpr{
-			isAll: false,
-			name: "One | Two",
-		},
-		Filter("#One \\| Two"), "they should be equal")
-
-	// current limitation from the lexer:
-	// we do not know about whitespace
-	// the above tests 'work' because the char is surrounded by spaces
-
-	// assert.Equal(t,
-	// 	ProjectExpr{
-	// 		isAll: false,
-	// 		name: "Exclam!",
-	// 	},
-	// 	Filter("#Exclam\\!"), "they should be equal")
-
-	// assert.Equal(t,
-	// 	ProjectExpr{
-	// 		isAll: false,
-	// 		name: "Or|",
-	// 	},
-	// 	Filter("#Or\\|"), "they should be equal")
+		Filter(`#One \& Two`), "they should be equal")
 
 	assert.Equal(t,
 		ProjectExpr{
 			isAll: false,
-			name: "*ball",
+			name:  `One\s?\|\s?Two`,
+		},
+		Filter(`#One \| Two`), "they should be equal")
+
+	assert.Equal(t,
+		ProjectExpr{
+			isAll: false,
+			name:  `One\s?\|\s?Two`,
+		},
+		Filter(`#One\|Two`), "they should be equal")
+
+	assert.Equal(t,
+		ProjectExpr{
+			isAll: false,
+			name:  "Exclam\\s?!",
+		},
+		Filter("#Exclam\\!"), "they should be equal")
+
+	assert.Equal(t,
+		ProjectExpr{
+			isAll: false,
+			name:  "Or\\s?\\|",
+		},
+		Filter("#Or\\|"), "they should be equal")
+
+	assert.Equal(t,
+		ProjectExpr{
+			isAll: false,
+			name:  ".*\\s?ball",
 		},
 		Filter("#*ball"), "they should be equal")
 
 	assert.Equal(t,
 		ProjectExpr{
 			isAll: false,
-			name: "base*",
+			name:  "base\\s?.*",
 		},
 		Filter("#base*"), "they should be equal")
 }
@@ -109,28 +112,28 @@ func TestLabelFilter(t *testing.T) {
 func TestBoolInfixFilter(t *testing.T) {
 	assert.Equal(t,
 		BoolInfixOpExpr{
-			left:     StringExpr{literal: "p1"},
+			left:     StringExpr{words: []string{"p1"}},
 			operator: '|',
-			right:    StringExpr{literal: "p2"},
+			right:    StringExpr{words: []string{"p2"}},
 		},
 		Filter("p1 | p2"), "they should be equal")
 
 	assert.Equal(t,
 		BoolInfixOpExpr{
-			left:     StringExpr{literal: "p1"},
+			left:     StringExpr{words: []string{"p1"}},
 			operator: '&',
-			right:    StringExpr{literal: "p2"},
+			right:    StringExpr{words: []string{"p2"}},
 		},
 		Filter("p1 & p2"), "they should be equal")
 
 	assert.Equal(t,
 		BoolInfixOpExpr{
-			left:     StringExpr{literal: "p1"},
+			left:     StringExpr{words: []string{"p1"}},
 			operator: '&',
 			right: BoolInfixOpExpr{
-				left:     StringExpr{literal: "p2"},
+				left:     StringExpr{words: []string{"p2"}},
 				operator: '|',
-				right:    StringExpr{literal: "p3"},
+				right:    StringExpr{words: []string{"p3"}},
 			},
 		},
 		Filter("p1 & (p2 | p3 )"), "they should be equal")
@@ -336,7 +339,6 @@ func TestRecurring(t *testing.T) {
 	)
 }
 
-
 func TestDateTimeElapsedFilter(t *testing.T) {
 	timeNow := time.Date(2017, time.January, 2, 18, 0, 0, 0, testTimeZone)
 	setNow(timeNow)
@@ -394,51 +396,51 @@ func TestNoSyntaxErrorAllOfficialExamples(t *testing.T) {
 		"assigned to: Becky",
 		"added by: me",
 		"added by: Becky",
-    "recurring",
+		"recurring",
 		"No priority",
-    "next 5 days",
+		"next 5 days",
 		"#multiple words",
-   // "#One \\& Two", // should match a project with literal name "One & Two"
-//
-// "due: yesterday, today", // two separate lists ...
-//
-// // text contains...
-// "search: Meeting",
-// "search: Meeting & today",
-// "search: Meeting | search: Work",
-// "search: email",
-// "search: http",
-// "search: http & search:*", // first wildcard...
-// // project / sections
-// "#Work",
-// "##Work",
-// "##School & !#Science",
-// "/Meetings", //See all tasks belonging to sections named "Meetings" across all projects
-// "#Work & /Meetings", // See all tasks belonging to the section "Meetings" in the project "Work"
-// "!/*",// See all tasks not assigned to sections
-// "!/* & !#Inbox",// See all tasks not assigned to sections, but excluding tasks in your Inbox
-// 		
-// // many date styles
-// "10/5/2022",
-// "Oct 5th 2022",
-// "10/5/2022 5pm",
-// "Oct 5th 5pm",
-// "today",
-// "tomorrow",
-// "yesterday",
-// "3 days",
-// "-3 days",
-// "Monday", // check day of week?
-// "Tuesday",
-// "Sunday",
-//
-// // wildcards
-// "@*ball",// will pull up a list of all tasks that have a label that ends with the word “ball”, like @baseball and @football.
-// "@home*",// See all tasks with any label that starts with “home”. For example, @homework and @homeoffice
-// "assigned to: m* smith",// See all tasks assigned to anyone whose first name starts with an M and last name is Smith
-// "#*Work",// See all tasks from projects which name ends with “work”. For example, #Artwork, #Network, and #Work
-// "Work*",// See all tasks from sections that have the word "Work" in the name. For example, /Work Meetings, /Work Admin, and /Work Calls
-// "!/*",// See all tasks that don't belong to any section
+		// "#One \\& Two", // should match a project with literal name "One & Two"
+		//
+		// "due: yesterday, today", // two separate lists ...
+		//
+		// // text contains...
+		// "search: Meeting",
+		// "search: Meeting & today",
+		// "search: Meeting | search: Work",
+		// "search: email",
+		// "search: http",
+		// "search: http & search:*", // first wildcard...
+		// // project / sections
+		// "#Work",
+		// "##Work",
+		// "##School & !#Science",
+		// "/Meetings", //See all tasks belonging to sections named "Meetings" across all projects
+		// "#Work & /Meetings", // See all tasks belonging to the section "Meetings" in the project "Work"
+		// "!/*",// See all tasks not assigned to sections
+		// "!/* & !#Inbox",// See all tasks not assigned to sections, but excluding tasks in your Inbox
+		//
+		// // many date styles
+		// "10/5/2022",
+		// "Oct 5th 2022",
+		// "10/5/2022 5pm",
+		// "Oct 5th 5pm",
+		// "today",
+		// "tomorrow",
+		// "yesterday",
+		// "3 days",
+		// "-3 days",
+		// "Monday", // check day of week?
+		// "Tuesday",
+		// "Sunday",
+		//
+		// // wildcards
+		// "@*ball",// will pull up a list of all tasks that have a label that ends with the word “ball”, like @baseball and @football.
+		// "@home*",// See all tasks with any label that starts with “home”. For example, @homework and @homeoffice
+		// "assigned to: m* smith",// See all tasks assigned to anyone whose first name starts with an M and last name is Smith
+		// "#*Work",// See all tasks from projects which name ends with “work”. For example, #Artwork, #Network, and #Work
+		// "Work*",// See all tasks from sections that have the word "Work" in the name. For example, /Work Meetings, /Work Admin, and /Work Calls
+		// "!/*",// See all tasks that don't belong to any section
 	}
 	for _, input := range tests {
 		e := Filter(input)
