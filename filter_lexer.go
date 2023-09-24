@@ -82,6 +82,7 @@ type BoolInfixOpExpr struct {
 type ProjectExpr struct {
 	isAll bool
 	name  string
+	section string
 }
 
 type LabelExpr struct {
@@ -102,6 +103,10 @@ const (
 	NO_TIME
 	CREATED_BEFORE
 )
+
+type WeekdayExpr struct {
+	day time.Weekday
+}
 
 type DateExpr struct {
 	operation dateOperation
@@ -152,6 +157,23 @@ var MonthIdentHash = map[string]time.Month{
 	"december":  time.December,
 }
 
+var WeekdayHash = map[string]time.Weekday{
+  "sunday":  time.Sunday,
+	"monday": time.Monday,
+	"tuesday": time.Tuesday,
+	"wednesday": time.Wednesday,
+	"thursday": time.Thursday,
+	"friday": time.Friday,
+	"saturday": time.Saturday,
+}
+
+var OrdinalHash = map[string]bool{
+	"st": true,
+	"nd": true,
+	"rd": true,
+	"th": true,
+}
+
 var TwelveClockIdentHash = map[string]bool{
 	"am": false,
 	"pm": true,
@@ -187,6 +209,10 @@ func (l *Lexer) Lex(lval *yySymType) int {
 			token = TOMORROW_IDENT
 		} else if _, ok := OverDueHash[lowerToken]; ok {
 			token = OVERDUE
+		} else if _, ok := OrdinalHash[lowerToken]; ok {
+			token = ORDINAL
+		} else if _, ok := WeekdayHash[lowerToken]; ok {
+			token = WEEKDAY
 		} else if lowerToken == "yesterday" {
 			token = YESTERDAY_IDENT
 		} else if lowerToken == "due" {

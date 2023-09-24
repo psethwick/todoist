@@ -393,6 +393,14 @@ func TestParseWildcard(t *testing.T) {
 	)
 }
 
+func TestWeekday(t *testing.T) {
+	assert.Equal(
+		t,
+		WeekdayExpr{day: time.Tuesday},
+		Filter("Tuesday"),
+	)
+}
+
 func TestNoSyntaxErrorAllOfficialExamples(t *testing.T) {
 	tests := []string{
 		"(today | overdue) & #Work",
@@ -434,34 +442,34 @@ func TestNoSyntaxErrorAllOfficialExamples(t *testing.T) {
 		"search: http",
 		"search: http & search:*",
 		
-		// "due: yesterday, today", // two separate lists ...
+		"Monday",
+		"Tuesday",
+		"Sunday",
+		"10/5/2022",
+		"10/5/2022 5pm",
+		"today",
+		"tomorrow",
+		"yesterday",
+		"3 days",
+		"-3 days",
+		"Oct 5th 2022",
+
+		"#Work",
+		"##Work",
+		"##School & !#Science",
+
 		//
 		// // text contains...
 		// // project / sections
-		// "#Work",
-		// "##Work",
-		// "##School & !#Science",
-		// "/Meetings", //See all tasks belonging to sections named "Meetings" across all projects
-		// "#Work & /Meetings", // See all tasks belonging to the section "Meetings" in the project "Work"
-		// "!/*",// See all tasks not assigned to sections
-		// "!/* & !#Inbox",// See all tasks not assigned to sections, but excluding tasks in your Inbox
-		//
-		// // many date styles
-		// "10/5/2022",
-		// "Oct 5th 2022",
-		// "10/5/2022 5pm",
-		// "Oct 5th 5pm",
-		// "today",
-		// "tomorrow",
-		// "yesterday",
-		// "3 days",
-		// "-3 days",
-		// "Monday", // check day of week?
-		// "Tuesday",
-		// "Sunday",
-		//
-		// // wildcards
-		// "!/*",// See all tasks that don't belong to any section
+		"/Meetings", //See all tasks belonging to sections named "Meetings" across all projects
+		"#Work/Meetings", //See all tasks belonging to sections named "Meetings" across all projects
+		"#Work & /Meetings", // See all tasks belonging to the section "Meetings" in the project "Work"
+		"!/*",// See all tasks not assigned to sections
+		"!/* & !#Inbox",// See all tasks not assigned to sections, but excluding tasks in your Inbox
+		
+		//  tricksy ones left:
+		// "Oct 5th 5pm", // seems like it should work, but syntax error
+		// "due: yesterday, today", // two separate lists ...
 	}
 	for _, input := range tests {
 		e := Filter(input)

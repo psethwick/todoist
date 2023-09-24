@@ -20,13 +20,15 @@ import (
 %token<token> MONTH_IDENT TWELVE_CLOCK_IDENT HOURS PRIORITY RECURRING
 %token<token> TODAY_IDENT TOMORROW_IDENT YESTERDAY_IDENT DAYS VIEW ALL
 %token<token> DUE CREATED BEFORE AFTER OVER OVERDUE NO DATE TIME LABELS
-%token<token> SEARCH
-%token<token> '#' '@' '\\' '&' '*'
+%token<token> SEARCH ORDINAL WEEKDAY
+%token<token> '#' '@' '\\' '&' '*' '/'
 
 %left STRING
 %left MONTH_IDENT
+%left ORDINAL
 %left NUMBER
-%left '*' 
+%left '/'
+%left '*'
 %left '&' '|'
 %left '\\'
 %left '(' ')'
@@ -62,9 +64,19 @@ expr
     {
         $$ = NotOpExpr{expr: $2}
     }
+    | '/' s_string
+    {
+        $$ = ProjectExpr{isAll: false, section: $2.(StringExpr).String()}
+    }
     | s_project_key s_string
     {
         $$ = ProjectExpr{isAll: false, name: $2.(StringExpr).String()}
+    }
+    | s_project_key s_string '/' s_string
+    {
+        name := $2.(StringExpr).String()
+        section := $4.(StringExpr).String()
+        $$ = ProjectExpr{isAll: false, name: name, section: section}
     }
     | s_project_all_key s_string
     {
@@ -136,6 +148,10 @@ expr
     {
         $$ = SearchExpr{keyword: $3.(StringExpr).String()}
     }
+    | WEEKDAY
+    {
+        $$ = WeekdayExpr{day: WeekdayHash[strings.ToLower($1.literal)]}
+    }
     | s_person
     | s_datetime
     | s_string
@@ -152,6 +168,18 @@ s_escaped
     | '\\' '|'
     {
         $$ = `\|`
+    }
+    | '\\' '*'
+    {
+        $$ = `\*`
+    }
+    | '\\' '('
+    {
+        $$ = `\(`
+    }
+    | '\\' ')'
+    {
+        $$ = `\)`
     }
 
 s_string
@@ -240,7 +268,7 @@ s_overdue
     }
 
 
-s_datetime
+s_datetime /*  */
     : s_date_year s_time
     {
         date := $1.(time.Time)
@@ -281,6 +309,10 @@ s_date_year
     {
         $$ = time.Date(atoi($5.literal), time.Month(atoi($1.literal)), atoi($3.literal), 0, 0, 0, 0, timezone())
     }
+    | MONTH_IDENT NUMBER ORDINAL NUMBER
+    {
+        $$ = time.Date(atoi($4.literal), MonthIdentHash[strings.ToLower($1.literal)], atoi($2.literal), 0, 0, 0, 0, timezone())
+    }
     | MONTH_IDENT NUMBER NUMBER
     {
         $$ = time.Date(atoi($3.literal), MonthIdentHash[strings.ToLower($1.literal)], atoi($2.literal), 0, 0, 0, 0, timezone())
@@ -313,6 +345,10 @@ s_date_year
 
 s_date
     : MONTH_IDENT NUMBER
+    {
+        $$ = time.Date(today().Year(), MonthIdentHash[strings.ToLower($1.literal)], atoi($2.literal), 0, 0, 0, 0, timezone())
+    }
+    | MONTH_IDENT NUMBER ORDINAL 
     {
         $$ = time.Date(today().Year(), MonthIdentHash[strings.ToLower($1.literal)], atoi($2.literal), 0, 0, 0, 0, timezone())
     }
