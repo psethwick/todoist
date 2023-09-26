@@ -26,6 +26,14 @@ func Eval(e Expression, item todoist.AbstractItem, projects todoist.Projects) (r
 		case '|':
 			return lr || rr, nil
 		}
+	case AssignedExpr:
+	  return item.(*todoist.Item).ResponsibleUID != nil, nil
+	// case NoPriorityExpr:
+	// case ListExpr:
+	// case RecurringExpr:
+	// case SubtaskExpr:
+	// case PersonExpr:
+	// case WeekdayExpr:
 	case ProjectExpr:
 		e := e.(ProjectExpr)
 		return EvalProject(e, item.GetProjectID(), projects), err

@@ -81,6 +81,7 @@ type BoolInfixOpExpr struct {
 	right    Expression
 }
 
+// TODO perhaps the main result should be a collection 
 type ListExpr struct {
 	exprs []Expression
 }

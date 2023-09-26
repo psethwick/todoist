@@ -57,6 +57,15 @@ func TestLabelEval(t *testing.T) {
 	testFilterEvalWithLabel(t, "@another", item1, false)
 }
 
+func TestAssignedEval(t *testing.T) {
+	assigned := todoist.Item{
+		ResponsibleUID: "12346",
+	}
+	notAssigned := todoist.Item{}
+	testFilterEval(t, "assigned", assigned, true)
+	testFilterEval(t, "assigned", notAssigned, false)
+}
+
 func TestProjectEval(t *testing.T) {
 	projects := todoist.Projects{
 		todoist.Project{
