@@ -28,12 +28,15 @@ func Eval(e Expression, item todoist.AbstractItem, projects todoist.Projects) (r
 		}
 	case AssignedExpr:
 	  return item.(*todoist.Item).ResponsibleUID != nil, nil
-	// case NoPriorityExpr:
-	// case ListExpr:
+	case NoPriorityExpr:
+		return item.(*todoist.Item).Priority == 0, nil
 	// case RecurringExpr:
 	// case SubtaskExpr:
 	// case PersonExpr:
 	// case WeekdayExpr:
+	// case ListExpr:
+	// aaaa, I repeat, perhaps the parser should return collection
+	// this makes no sense
 	case ProjectExpr:
 		e := e.(ProjectExpr)
 		return EvalProject(e, item.GetProjectID(), projects), err

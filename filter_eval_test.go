@@ -66,6 +66,14 @@ func TestAssignedEval(t *testing.T) {
 	testFilterEval(t, "assigned", notAssigned, false)
 }
 
+func TestNoPriorityEval(t *testing.T) {
+	testFilterEval(t, "no priority", todoist.Item{Priority: 1}, false)
+	testFilterEval(t, "no priority", todoist.Item{Priority: 2}, false)
+	testFilterEval(t, "no priority", todoist.Item{Priority: 3}, false)
+	testFilterEval(t, "no priority", todoist.Item{Priority: 4}, false)
+	testFilterEval(t, "no priority", todoist.Item{}, true)
+}
+
 func TestProjectEval(t *testing.T) {
 	projects := todoist.Projects{
 		todoist.Project{
