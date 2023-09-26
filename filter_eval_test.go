@@ -67,11 +67,12 @@ func TestAssignedEval(t *testing.T) {
 }
 
 func TestNoPriorityEval(t *testing.T) {
-	testFilterEval(t, "no priority", todoist.Item{Priority: 1}, false)
+	// p4 is 'no priority'
+	// and p4 maps to 1
+	testFilterEval(t, "no priority", todoist.Item{Priority: 1}, true)
 	testFilterEval(t, "no priority", todoist.Item{Priority: 2}, false)
 	testFilterEval(t, "no priority", todoist.Item{Priority: 3}, false)
 	testFilterEval(t, "no priority", todoist.Item{Priority: 4}, false)
-	testFilterEval(t, "no priority", todoist.Item{}, true)
 }
 
 func TestProjectEval(t *testing.T) {
@@ -196,7 +197,13 @@ func TestDueAfterEval(t *testing.T) {
 	testFilterEval(t, "due after: 10/2/2017 13:00", todoist.Item{Due: nil}, false) // JST: Mon 2 Oct 2017 13:01:00
 }
 
-func TestWildcard(t *testing.T) {
+func TestIsRecurring(t *testing.T) {
+	testFilterEval(t, "recurring", todoist.Item{}, false)
+	testFilterEval(t, "recurring", todoist.Item{Due: &todoist.Due{}}, false)
+	testFilterEval(t, "recurring", todoist.Item{Due: &todoist.Due{ IsRecurring: true}}, true)
+}
+
+func TestWildcardProject(t *testing.T) {
 	projects := todoist.Projects{
 		todoist.Project{
 			HaveID: todoist.HaveID{ID: "1"},
