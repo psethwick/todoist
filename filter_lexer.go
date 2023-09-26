@@ -81,6 +81,10 @@ type BoolInfixOpExpr struct {
 	right    Expression
 }
 
+type ListExpr struct {
+	exprs []Expression
+}
+
 type ProjectExpr struct {
 	isAll   bool
 	name    string

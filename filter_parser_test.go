@@ -447,6 +447,78 @@ func TestSections(t *testing.T) {
 	)
 }
 
+func TestComplexFilter(t *testing.T) {
+	timeNow := time.Date(2017, time.January, 2, 18, 0, 0, 0, testTimeZone)
+	setNow(timeNow)
+	assert.Equal(
+		t,
+		BoolInfixOpExpr{
+			left: BoolInfixOpExpr{
+				left: BoolInfixOpExpr{
+					left: BoolInfixOpExpr{
+						left: DateExpr{
+							operation: DUE_ON,
+							datetime:  time.Date(2017, time.January, 2, 0, 0, 0, 0, testTimeZone),
+							allDay:    true,
+						},
+						operator: '|',
+						right: DateExpr{
+							operation: DUE_BEFORE,
+							datetime:  timeNow,
+							allDay:    false,
+						},
+					},
+					operator: '&',
+					right: ProjectExpr{
+						isAll: true,
+						name:  "Inbox",
+					}},
+				operator: '&',
+				right: NotOpExpr{
+					expr: PersonExpr{person: "others"},
+				}}, operator: '&',
+			right: NotOpExpr{expr: LabelExpr{name: "me"}},
+		},
+		Filter("(today | overdue) & ##Inbox & (!assigned to: others) & (!@me)"),
+	)
+}
+
+func TestListExpr(t *testing.T) {
+	timeNow := time.Date(2017, time.January, 2, 18, 0, 0, 0, testTimeZone)
+	setNow(timeNow)
+	assert.Equal(
+		t,
+		ListExpr{exprs: []Expression{
+			DateExpr{
+				datetime: time.Date(2017, time.January, 1, 0, 0, 0, 0, testTimeZone),
+				allDay:   true,
+			},
+			DateExpr{
+				datetime: time.Date(2017, time.January, 2, 0, 0, 0, 0, testTimeZone),
+				allDay:   true,
+			},
+		}},
+		Filter("due: yesterday, today"),
+	)
+
+	assert.Equal(
+		t,
+		ListExpr{exprs: []Expression{
+			ProjectExpr{
+				name: "Work",
+			},
+			ProjectExpr{
+				name: "Play",
+			},
+			DateExpr{
+				datetime: time.Date(2017, time.January, 2, 0, 0, 0, 0, testTimeZone),
+				allDay:   true,
+			},
+		}},
+		Filter("#Work, #Play, today"),
+	)
+}
+
 func TestNoSyntaxErrorAllOfficialExamples(t *testing.T) {
 	tests := []string{
 		"(today | overdue) & #Work",
@@ -498,6 +570,7 @@ func TestNoSyntaxErrorAllOfficialExamples(t *testing.T) {
 		"yesterday",
 		"3 days",
 		"-3 days",
+		"yesterday",
 
 		"Oct 5th 2022",
 		"Oct 5th 5pm",
@@ -512,8 +585,7 @@ func TestNoSyntaxErrorAllOfficialExamples(t *testing.T) {
 		"!/*",
 		"!/* & !#Inbox",
 
-		//  tricksy ones left:
-		// "due: yesterday, today", // two separate lists ...
+		"due: yesterday, today",
 	}
 	for _, input := range tests {
 		e := Filter(input)
