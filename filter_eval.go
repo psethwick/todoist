@@ -39,7 +39,10 @@ func Eval(e Expression, item todoist.AbstractItem, projects todoist.Projects) (r
 		}
 		return due.IsRecurring, nil
 	// case SearchExpr:
-	// case SubtaskExpr:
+	case SubtaskExpr:
+		parentId := item.(*todoist.Item).HaveParentID.ParentID
+		return parentId != nil, nil
+		
 	// case WeekdayExpr:
 	// case PersonExpr:
 	// case ListExpr:

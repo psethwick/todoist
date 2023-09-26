@@ -203,6 +203,12 @@ func TestIsRecurring(t *testing.T) {
 	testFilterEval(t, "recurring", todoist.Item{Due: &todoist.Due{ IsRecurring: true}}, true)
 }
 
+func TestSubtaskEval(t *testing.T) {
+	testFilterEval(t, "subtask", todoist.Item{}, false)
+	p := "1234"
+	testFilterEval(t, "subtask", todoist.Item{HaveParentID: todoist.HaveParentID{ ParentID: &p }}, true)
+}
+
 func TestWildcardProject(t *testing.T) {
 	projects := todoist.Projects{
 		todoist.Project{
