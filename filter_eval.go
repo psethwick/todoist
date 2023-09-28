@@ -10,13 +10,13 @@ import (
 
 var priorityRegex = regexp.MustCompile("^p([1-4])$")
 
-func Eval(e Expression, item todoist.AbstractItem, projects todoist.Projects) (result bool, err error) {
+func Eval(e Expression, item todoist.AbstractItem, store *todoist.Store) (result bool, err error) {
 	result = false
 	switch e.(type) {
 	case BoolInfixOpExpr:
 		e := e.(BoolInfixOpExpr)
-		lr, err := Eval(e.left, item, projects)
-		rr, err := Eval(e.right, item, projects)
+		lr, err := Eval(e.left, item, store)
+		rr, err := Eval(e.right, item, store)
 		if err != nil {
 			return false, nil
 		}
@@ -27,10 +27,8 @@ func Eval(e Expression, item todoist.AbstractItem, projects todoist.Projects) (r
 			return lr || rr, nil
 		}
 	case AssignedExpr:
-		// todo tidy up pointer casting
-	  return item.(*todoist.Item).ResponsibleUID != nil, nil
+		return item.(*todoist.Item).ResponsibleUID != nil, nil
 	case NoPriorityExpr:
-		// ditto
 		return item.(*todoist.Item).Priority == 1, nil
 	case RecurringExpr:
 		due := item.(*todoist.Item).Due
@@ -47,14 +45,18 @@ func Eval(e Expression, item todoist.AbstractItem, projects todoist.Projects) (r
 			return false, nil
 		}
 		return due.Weekday() == e.(WeekdayExpr).day, nil
-	// case SearchExpr:
+	case SearchExpr:
+		keywords := e.(SearchExpr).keyword
+		content := item.(*todoist.Item).Content
+		match, _ := regexp.MatchString(keywords, content)
+		return match, nil
 	// case PersonExpr:
 	// case ListExpr:
 	// aaaa, I repeat, perhaps the parser should return collection
 	// this makes no sense
 	case ProjectExpr:
 		e := e.(ProjectExpr)
-		return EvalProject(e, item.GetProjectID(), projects), err
+		return EvalProject(e, item.GetProjectID(), store.Projects), err
 	case LabelExpr:
 		e := e.(LabelExpr)
 		return EvalLabel(e, item.GetLabelNames()), err
@@ -75,7 +77,7 @@ func Eval(e Expression, item todoist.AbstractItem, projects todoist.Projects) (r
 		return true, nil
 	case NotOpExpr:
 		e := e.(NotOpExpr)
-		r, err := Eval(e.expr, item, projects)
+		r, err := Eval(e.expr, item, store)
 		if err != nil {
 			return false, nil
 		}

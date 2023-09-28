@@ -519,6 +519,14 @@ func TestListExpr(t *testing.T) {
 	)
 }
 
+func TestSearchExpr(t *testing.T) {
+	assert.Equal(
+		t,
+		SearchExpr{keyword: "Meeting"},
+		Filter("search: Meeting"),
+	)
+}
+
 func TestNoSyntaxErrorAllOfficialExamples(t *testing.T) {
 	tests := []string{
 		"(today | overdue) & #Work",

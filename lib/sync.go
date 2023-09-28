@@ -2,7 +2,7 @@ package todoist
 
 type Store struct {
 	CollaboratorStates []interface{} `json:"collaborator_states"`
-	Collaborators      []interface{} `json:"collaborators"`
+	Collaborators      Collaborators `json:"collaborators"`
 	DayOrders          interface{}   `json:"day_orders"`
 	DayOrdersTimestamp string        `json:"day_orders_timestamp"`
 	Filters            []struct {

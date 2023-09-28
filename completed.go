@@ -32,7 +32,7 @@ func CompletedList(c *cli.Context) error {
 	}
 
 	for _, item := range completed.Items {
-		result, err := Eval(ex, item, client.Store.Projects)
+		result, err := Eval(ex, item, client.Store)
 		if err != nil {
 			return err
 		}

@@ -25,17 +25,22 @@ func due(s string) *todoist.Due {
 }
 
 func testFilterEval(t *testing.T, f string, item todoist.Item, expect bool) {
-	actual, _ := Eval(Filter(f), &item, todoist.Projects{})
+	actual, _ := Eval(Filter(f), &item, &todoist.Store{})
 	assert.Equal(t, expect, actual, "they should be equal")
 }
 
 func testFilterEvalWithProject(t *testing.T, f string, item todoist.Item, projects todoist.Projects, expect bool) {
-	actual, _ := Eval(Filter(f), &item, projects)
+	actual, _ := Eval(Filter(f), &item, &todoist.Store{Projects: projects})
+	assert.Equal(t, expect, actual, "they should be equal")
+}
+
+func testFilterEvalWithCollaborators(t *testing.T, f string, item todoist.Item, user todoist.User, collaborators todoist.Collaborators, expect bool) {
+	actual, _ := Eval(Filter(f), &item, &todoist.Store{User: user, Collaborators: collaborators})
 	assert.Equal(t, expect, actual, "they should be equal")
 }
 
 func testFilterEvalWithLabel(t *testing.T, f string, item todoist.Item, expect bool) {
-	actual, _ := Eval(Filter(f), &item, todoist.Projects{})
+	actual, _ := Eval(Filter(f), &item, &todoist.Store{})
 	assert.Equal(t, expect, actual, "they should be equal")
 }
 
@@ -200,19 +205,117 @@ func TestDueAfterEval(t *testing.T) {
 func TestIsRecurring(t *testing.T) {
 	testFilterEval(t, "recurring", todoist.Item{}, false)
 	testFilterEval(t, "recurring", todoist.Item{Due: &todoist.Due{}}, false)
-	testFilterEval(t, "recurring", todoist.Item{Due: &todoist.Due{ IsRecurring: true}}, true)
+	testFilterEval(t, "recurring", todoist.Item{Due: &todoist.Due{IsRecurring: true}}, true)
 }
 
 func TestSubtaskEval(t *testing.T) {
 	testFilterEval(t, "subtask", todoist.Item{}, false)
 	p := "1234"
-	testFilterEval(t, "subtask", todoist.Item{HaveParentID: todoist.HaveParentID{ ParentID: &p }}, true)
+	testFilterEval(t, "subtask", todoist.Item{HaveParentID: todoist.HaveParentID{ParentID: &p}}, true)
 }
 
 func TestWeekdayEval(t *testing.T) {
 	testFilterEval(t, "Tuesday", todoist.Item{Due: due("Tue 3 Oct 2017 00:00:00 +0000")}, true)
 	testFilterEval(t, "Tuesday", todoist.Item{Due: due("Mon 2 Oct 2017 00:00:00 +0000")}, false)
 	testFilterEval(t, "Tuesday", todoist.Item{}, false)
+}
+
+func TestSearchEval(t *testing.T) {
+	testFilterEval(t, "search: work on that project", todoist.Item{BaseItem: todoist.BaseItem{Content: "work on that project"}}, true)
+	testFilterEval(t, "search: work on that other project", todoist.Item{BaseItem: todoist.BaseItem{Content: "work on that project"}}, false)
+
+	// partial should also work
+	testFilterEval(t, "search: project", todoist.Item{BaseItem: todoist.BaseItem{Content: "work on that project"}}, true)
+	testFilterEval(t, "search: work", todoist.Item{BaseItem: todoist.BaseItem{Content: "work on that project"}}, true)
+
+	// wilcards should work
+	testFilterEval(t, "search: work on*project", todoist.Item{BaseItem: todoist.BaseItem{Content: "work on that project"}}, true)
+	testFilterEval(t, "search: work on*project", todoist.Item{BaseItem: todoist.BaseItem{Content: "work on that other project"}}, true)
+	testFilterEval(t, "search: work on * other project", todoist.Item{BaseItem: todoist.BaseItem{Content: "work on that project"}}, false)
+}
+
+func TestPersonExprEval(t *testing.T) {
+	user := todoist.User{
+		ID:    "1",
+		Email: "alice@example.com",
+	}
+
+	collaborators := todoist.Collaborators{
+		{
+			Id:       "1",
+			Email:    "alice@example.com",
+			FullName: "Alice",
+		},
+		{
+			Id:       "2",
+			Email:    "bob@example.com",
+			FullName: "Bob",
+		},
+		{
+			Id:       "3",
+			FullName: "Definitely a Name",
+		},
+	}
+
+	// assigned to
+	testFilterEvalWithCollaborators(t, "assigned to: me", todoist.Item{ResponsibleUID: "1"}, user, collaborators, true)
+	testFilterEvalWithCollaborators(t, "assigned to: Me", todoist.Item{ResponsibleUID: "1"}, user, collaborators, true)
+
+	testFilterEvalWithCollaborators(t, "assigned to: Me", todoist.Item{ResponsibleUID: "2"}, user, collaborators, false)
+
+	testFilterEvalWithCollaborators(t, "assigned to: Others", todoist.Item{ResponsibleUID: "2"}, user, collaborators, true)
+	testFilterEvalWithCollaborators(t, "assigned to: others", todoist.Item{ResponsibleUID: "2"}, user, collaborators, true)
+	testFilterEvalWithCollaborators(t, "assigned to: Others", todoist.Item{ResponsibleUID: "1"}, user, collaborators, false)
+
+	testFilterEvalWithCollaborators(t, "assigned to: Alice", todoist.Item{ResponsibleUID: "1"}, user, collaborators, true)
+	testFilterEvalWithCollaborators(t, "assigned to: Bob", todoist.Item{ResponsibleUID: "1"}, user, collaborators, false)
+	testFilterEvalWithCollaborators(t, "assigned to: Bob", todoist.Item{ResponsibleUID: "1"}, user, collaborators, false)
+
+	testFilterEvalWithCollaborators(t, "assigned to: bob@example.com", todoist.Item{ResponsibleUID: "2"}, user, collaborators, true)
+	testFilterEvalWithCollaborators(t, "assigned to: alice@example.com", todoist.Item{ResponsibleUID: "2"}, user, collaborators, false)
+
+	testFilterEvalWithCollaborators(t, "assigned to: Definitely a Name", todoist.Item{ResponsibleUID: "3"}, user, collaborators, true)
+	testFilterEvalWithCollaborators(t, "assigned to: Definitely a Name", todoist.Item{ResponsibleUID: "2"}, user, collaborators, false)
+
+	// assigned by
+	testFilterEvalWithCollaborators(t, "assigned by: me", todoist.Item{ResponsibleUID: "1"}, user, collaborators, true)
+	testFilterEvalWithCollaborators(t, "assigned by: Me", todoist.Item{ResponsibleUID: "1"}, user, collaborators, true)
+
+	testFilterEvalWithCollaborators(t, "assigned by: Me", todoist.Item{ResponsibleUID: "2"}, user, collaborators, false)
+
+	testFilterEvalWithCollaborators(t, "assigned by: Others", todoist.Item{AssignedByUID: "2"}, user, collaborators, true)
+	testFilterEvalWithCollaborators(t, "assigned by: others", todoist.Item{AssignedByUID: "2"}, user, collaborators, true)
+	testFilterEvalWithCollaborators(t, "assigned by: Others", todoist.Item{AssignedByUID: "1"}, user, collaborators, false)
+
+	testFilterEvalWithCollaborators(t, "assigned by: Alice", todoist.Item{AssignedByUID: "1"}, user, collaborators, true)
+	testFilterEvalWithCollaborators(t, "assigned by: Bob", todoist.Item{AssignedByUID: "1"}, user, collaborators, false)
+	testFilterEvalWithCollaborators(t, "assigned by: Bob", todoist.Item{AssignedByUID: "1"}, user, collaborators, false)
+
+	testFilterEvalWithCollaborators(t, "assigned by: bob@example.com", todoist.Item{AssignedByUID: "2"}, user, collaborators, true)
+	testFilterEvalWithCollaborators(t, "assigned by: alice@example.com", todoist.Item{AssignedByUID: "2"}, user, collaborators, false)
+
+	testFilterEvalWithCollaborators(t, "assigned by: Definitely a Name", todoist.Item{AssignedByUID: "3"}, user, collaborators, true)
+	testFilterEvalWithCollaborators(t, "assigned by: Definitely a Name", todoist.Item{AssignedByUID: "2"}, user, collaborators, false)
+
+	// added by
+	testFilterEvalWithCollaborators(t, "added by: me", todoist.Item{ResponsibleUID: "1"}, user, collaborators, true)
+	testFilterEvalWithCollaborators(t, "added by: Me", todoist.Item{ResponsibleUID: "1"}, user, collaborators, true)
+
+	testFilterEvalWithCollaborators(t, "added by: Me", todoist.Item{ResponsibleUID: "2"}, user, collaborators, false)
+
+	testFilterEvalWithCollaborators(t, "added by: Others", todoist.Item{BaseItem: todoist.BaseItem{UserID: "2"}}, user, collaborators, true)
+	testFilterEvalWithCollaborators(t, "added by: others", todoist.Item{BaseItem: todoist.BaseItem{UserID: "2"}}, user, collaborators, true)
+	testFilterEvalWithCollaborators(t, "added by: Others", todoist.Item{BaseItem: todoist.BaseItem{UserID: "1"}}, user, collaborators, false)
+
+	testFilterEvalWithCollaborators(t, "added by: Alice", todoist.Item{BaseItem: todoist.BaseItem{UserID: "1"}}, user, collaborators, true)
+	testFilterEvalWithCollaborators(t, "added by: Bob", todoist.Item{BaseItem: todoist.BaseItem{UserID: "1"}}, user, collaborators, false)
+	testFilterEvalWithCollaborators(t, "added by: Bob", todoist.Item{BaseItem: todoist.BaseItem{UserID: "1"}}, user, collaborators, false)
+
+	testFilterEvalWithCollaborators(t, "added by: bob@example.com", todoist.Item{BaseItem: todoist.BaseItem{UserID: "2"}}, user, collaborators, true)
+	testFilterEvalWithCollaborators(t, "added by: alice@example.com", todoist.Item{BaseItem: todoist.BaseItem{UserID: "2"}}, user, collaborators, false)
+
+	testFilterEvalWithCollaborators(t, "added by: Definitely a Name", todoist.Item{BaseItem: todoist.BaseItem{UserID: "3"}}, user, collaborators, true)
+	testFilterEvalWithCollaborators(t, "added by: Definitely a Name", todoist.Item{BaseItem: todoist.BaseItem{UserID: "2"}}, user, collaborators, false)
 }
 
 func TestWildcardProject(t *testing.T) {
