@@ -209,6 +209,12 @@ func TestSubtaskEval(t *testing.T) {
 	testFilterEval(t, "subtask", todoist.Item{HaveParentID: todoist.HaveParentID{ ParentID: &p }}, true)
 }
 
+func TestWeekdayEval(t *testing.T) {
+	testFilterEval(t, "Tuesday", todoist.Item{Due: due("Tue 3 Oct 2017 00:00:00 +0000")}, true)
+	testFilterEval(t, "Tuesday", todoist.Item{Due: due("Mon 2 Oct 2017 00:00:00 +0000")}, false)
+	testFilterEval(t, "Tuesday", todoist.Item{}, false)
+}
+
 func TestWildcardProject(t *testing.T) {
 	projects := todoist.Projects{
 		todoist.Project{

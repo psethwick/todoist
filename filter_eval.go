@@ -38,12 +38,16 @@ func Eval(e Expression, item todoist.AbstractItem, projects todoist.Projects) (r
 			return false, nil
 		}
 		return due.IsRecurring, nil
-	// case SearchExpr:
 	case SubtaskExpr:
 		parentId := item.(*todoist.Item).HaveParentID.ParentID
 		return parentId != nil, nil
-		
-	// case WeekdayExpr:
+	case WeekdayExpr:
+		due := item.DateTime()
+		if (due == time.Time{}) {
+			return false, nil
+		}
+		return due.Weekday() == e.(WeekdayExpr).day, nil
+	// case SearchExpr:
 	// case PersonExpr:
 	// case ListExpr:
 	// aaaa, I repeat, perhaps the parser should return collection
