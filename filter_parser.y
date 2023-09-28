@@ -15,13 +15,13 @@ import (
 %type<expr> s_datetime s_date s_date_year
 %type<expr> s_overdue s_nodate s_project_key s_project_all_key 
 %type<expr> s_time s_person s_label_key s_no_labels s_string 
-%type<expr> s_escaped s_list_expr
+%type<expr> s_special_chars s_list_expr
 %token<token> BY TO ADDED ASSIGNED SUBTASK SHARED STRING NUMBER NEXT
 %token<token> MONTH_IDENT TWELVE_CLOCK_IDENT HOURS PRIORITY RECURRING
 %token<token> TODAY_IDENT TOMORROW_IDENT YESTERDAY_IDENT DAYS VIEW ALL
 %token<token> DUE CREATED BEFORE AFTER OVER OVERDUE NO DATE TIME LABELS
 %token<token> SEARCH ORDINAL WEEKDAY YEAR_NUMBER
-%token<token> '#' '@' '\\' '&' '*' '/' ','
+%token<token> '#' '@' '\\' '&' '*' '/' ',' '.'
 
 %left STRING
 %left MONTH_IDENT
@@ -175,7 +175,7 @@ s_list_expr
         $$ = ListExpr{exprs: []Expression{$1, $3}}
     }
 
-s_escaped
+s_special_chars
     : '\\' '&'
     {
         $$ = "&"
@@ -200,6 +200,10 @@ s_escaped
     {
         $$ = `\)`
     }
+    | '.'
+    {
+        $$ =`\.`
+    }
 
 s_string
     : STRING
@@ -210,7 +214,7 @@ s_string
     {
         $$ = NewStringExpr(".*")
     }
-    | s_escaped
+    | s_special_chars
     {
         $$ = NewStringExpr($1.(string))
     }
@@ -222,7 +226,7 @@ s_string
     {
         $$ = $1.(StringExpr).Add(NewStringExpr(".*"))
     }
-    | s_string s_escaped
+    | s_string s_special_chars
     {
         $$ = $1.(StringExpr).Add(NewStringExpr($2.(string)))
     }

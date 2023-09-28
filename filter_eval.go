@@ -3,6 +3,7 @@ package main
 import (
 	"regexp"
 	"strconv"
+	"strings"
 	"time"
 
 	todoist "github.com/sachaos/todoist/lib"
@@ -16,6 +17,9 @@ func Eval(e Expression, item todoist.AbstractItem, store *todoist.Store) (result
 	case BoolInfixOpExpr:
 		e := e.(BoolInfixOpExpr)
 		lr, err := Eval(e.left, item, store)
+		if err != nil {
+			return false, nil
+		}
 		rr, err := Eval(e.right, item, store)
 		if err != nil {
 			return false, nil
@@ -50,7 +54,9 @@ func Eval(e Expression, item todoist.AbstractItem, store *todoist.Store) (result
 		content := item.(*todoist.Item).Content
 		match, _ := regexp.MatchString(keywords, content)
 		return match, nil
-	// case PersonExpr:
+	case PersonExpr:
+		e := e.(PersonExpr)
+		return EvalPerson(e, item.(*todoist.Item), store.User, store.Collaborators), err
 	// case ListExpr:
 	// aaaa, I repeat, perhaps the parser should return collection
 	// this makes no sense
@@ -72,9 +78,6 @@ func Eval(e Expression, item todoist.AbstractItem, store *todoist.Store) (result
 	case DateExpr:
 		e := e.(DateExpr)
 		return EvalDate(e, item), err
-	case ViewAllExpr:
-		// we could fall through to the default, but let's not
-		return true, nil
 	case NotOpExpr:
 		e := e.(NotOpExpr)
 		r, err := Eval(e.expr, item, store)
@@ -82,10 +85,56 @@ func Eval(e Expression, item todoist.AbstractItem, store *todoist.Store) (result
 			return false, nil
 		}
 		return !r, nil
+	case ViewAllExpr:
+		return true, nil
 	default:
 		return true, err
 	}
 	return
+}
+
+func personMatcher(e PersonExpr, user todoist.User, collaborators todoist.Collaborators) func(id string) bool {
+	switch strings.ToLower(e.person) {
+	case "me":
+		return func(id string) bool {
+			return id == user.ID
+		}
+	case "others":
+		return func(id string) bool {
+			return id != "" && id != user.ID
+		}
+	default:
+		return func(id string) bool {
+			for _, c := range collaborators {
+				matchEmail, _ := regexp.MatchString(e.person, c.Email)
+				if matchEmail {
+					return id == c.ID
+				}
+				matchName, _ := regexp.MatchString(e.person, c.FullName)
+				if matchName {
+					return id == c.ID
+				}
+			}
+			return false
+		}
+	}
+}
+
+func EvalPerson(e PersonExpr, item *todoist.Item, user todoist.User, collaborators todoist.Collaborators) (result bool) {
+	matcher := personMatcher(e, user, collaborators)
+	switch e.operation {
+	case ASSIGNED_BY:
+		return matcher(item.AssignedByUID)
+	case ASSIGNED_TO:
+		id, ok := item.ResponsibleUID.(string)
+		if !ok {
+			return false
+		}
+		return matcher(id)
+	case ADDED_BY:
+		return matcher(item.UserID)
+	}
+	return true
 }
 
 func EvalDate(e DateExpr, item todoist.AbstractItem) (result bool) {

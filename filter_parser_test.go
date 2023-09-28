@@ -304,6 +304,12 @@ func TestPerson(t *testing.T) {
 		Filter("assigned to: me"),
 	)
 
+	// todo email addresses .. on hold
+	// assert.Equal(t,
+	// 	PersonExpr{operation: ASSIGNED_TO, person: `alice\s?@\s?example.com`},
+	// 	Filter("assigned to: alice@example.com"),
+	// )
+
 	assert.Equal(t,
 		PersonExpr{operation: ASSIGNED_BY, person: "me"},
 		Filter("assigned by: me"),
@@ -558,6 +564,7 @@ func TestNoSyntaxErrorAllOfficialExamples(t *testing.T) {
 		"@*ball",
 		"@home*",
 		"assigned to: m* smith",
+		// "assigned to: alice@example.com",
 		"#*Work",
 		"Work*",
 
