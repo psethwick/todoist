@@ -81,11 +81,6 @@ type BoolInfixOpExpr struct {
 	right    Expression
 }
 
-// TODO perhaps the main result should be a collection
-type ListExpr struct {
-	exprs []Expression
-}
-
 type ProjectExpr struct {
 	isAll   bool
 	name    string
@@ -139,7 +134,7 @@ var timezone = func() *time.Location {
 
 type Lexer struct {
 	scanner.Scanner
-	result Expression
+	result []Expression
 	last   int
 }
 
@@ -321,10 +316,10 @@ func (l *Lexer) Lex(lval *yySymType) int {
 }
 
 func (l *Lexer) Error(e string) {
-	l.result = ErrorExpr{e}
+	l.result = append(l.result, ErrorExpr{e})
 }
 
-func Filter(f string) (e Expression) {
+func Filter(f string) (e []Expression) {
 	l := new(Lexer)
 	l.Init(strings.NewReader(f))
 	// exclude scanner.ScanFloats because afternoon times in am/pm format trigger float parsing

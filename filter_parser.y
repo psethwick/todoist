@@ -9,13 +9,15 @@ import (
 %union{
     token Token
     expr Expression
+    exprs []Expression
 }
 
-%type<expr> filter expr
+%type<exprs> filter exprs
+%type<expr> expr 
 %type<expr> s_datetime s_date s_date_year
 %type<expr> s_overdue s_nodate s_project_key s_project_all_key 
 %type<expr> s_time s_person s_label_key s_no_labels s_string 
-%type<expr> s_special_chars s_list_expr
+%type<expr> s_special_chars
 %token<token> BY TO ADDED ASSIGNED SUBTASK SHARED STRING NUMBER NEXT
 %token<token> MONTH_IDENT TWELVE_CLOCK_IDENT HOURS PRIORITY RECURRING
 %token<token> TODAY_IDENT TOMORROW_IDENT YESTERDAY_IDENT DAYS VIEW ALL
@@ -38,17 +40,27 @@ import (
 %%
 
 filter
-    :
-    {
-        $$ = VoidExpr{}
-    }
-    | expr
+    : exprs
     {
         yylex.(*Lexer).result = $1
     }
 
+exprs
+    : expr
+    {
+        $$ = []Expression{$1}
+    }
+    | exprs ',' expr
+    {
+        $$ = append($1, $3)
+    }
+
 expr
-    : expr '|' expr
+    :
+    {
+        $$ = VoidExpr{}
+    }
+    | expr '|' expr
     {
         $$ = BoolInfixOpExpr{left: $1, operator: '|', right: $3}
     }
@@ -161,19 +173,7 @@ expr
     | s_person
     | s_datetime
     | s_string
-    | s_list_expr
 
-s_list_expr
-    : s_list_expr ',' expr
-    {
-        l := $1.(ListExpr)
-        l.exprs = append(l.exprs, $3)
-        $$ = l
-    }
-    | expr ',' expr
-    {
-        $$ = ListExpr{exprs: []Expression{$1, $3}}
-    }
 
 s_special_chars
     : '\\' '&'

@@ -57,9 +57,6 @@ func Eval(e Expression, item todoist.AbstractItem, store *todoist.Store) (result
 	case PersonExpr:
 		e := e.(PersonExpr)
 		return EvalPerson(e, item.(*todoist.Item), store.User, store.Collaborators), err
-	// case ListExpr:
-	// aaaa, I repeat, perhaps the parser should return collection
-	// this makes no sense
 	case ProjectExpr:
 		e := e.(ProjectExpr)
 		return EvalProject(e, item.GetProjectID(), store.Projects), err
@@ -93,46 +90,39 @@ func Eval(e Expression, item todoist.AbstractItem, store *todoist.Store) (result
 	return
 }
 
-func personMatcher(e PersonExpr, user todoist.User, collaborators todoist.Collaborators) func(id string) bool {
+func doesPersonMatch(e PersonExpr, user todoist.User, collaborators todoist.Collaborators, id string) bool {
 	switch strings.ToLower(e.person) {
 	case "me":
-		return func(id string) bool {
-			return id == user.ID
-		}
+		return id == user.ID
 	case "others":
-		return func(id string) bool {
-			return id != "" && id != user.ID
-		}
+		return id != "" && id != user.ID
 	default:
-		return func(id string) bool {
-			for _, c := range collaborators {
-				matchEmail, _ := regexp.MatchString(e.person, c.Email)
-				if matchEmail {
-					return id == c.ID
-				}
-				matchName, _ := regexp.MatchString(e.person, c.FullName)
-				if matchName {
-					return id == c.ID
-				}
+		for _, c := range collaborators {
+			matchEmail, _ := regexp.MatchString(e.person, c.Email)
+			if matchEmail {
+				return id == c.ID
 			}
-			return false
+			matchName, _ := regexp.MatchString(e.person, c.FullName)
+			if matchName {
+				return id == c.ID
+			}
 		}
+		return false
 	}
 }
 
 func EvalPerson(e PersonExpr, item *todoist.Item, user todoist.User, collaborators todoist.Collaborators) (result bool) {
-	matcher := personMatcher(e, user, collaborators)
 	switch e.operation {
 	case ASSIGNED_BY:
-		return matcher(item.AssignedByUID)
+		return doesPersonMatch(e, user, collaborators, item.AssignedByUID)
 	case ASSIGNED_TO:
 		id, ok := item.ResponsibleUID.(string)
 		if !ok {
 			return false
 		}
-		return matcher(id)
+		return doesPersonMatch(e, user, collaborators, id)
 	case ADDED_BY:
-		return matcher(item.UserID)
+		return doesPersonMatch(e, user, collaborators, item.UserID)
 	}
 	return true
 }

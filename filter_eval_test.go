@@ -25,22 +25,22 @@ func due(s string) *todoist.Due {
 }
 
 func testFilterEval(t *testing.T, f string, item todoist.Item, expect bool) {
-	actual, _ := Eval(Filter(f), &item, &todoist.Store{})
+	actual, _ := Eval(Filter(f)[0], &item, &todoist.Store{})
 	assert.Equal(t, expect, actual, "they should be equal")
 }
 
 func testFilterEvalWithProject(t *testing.T, f string, item todoist.Item, projects todoist.Projects, expect bool) {
-	actual, _ := Eval(Filter(f), &item, &todoist.Store{Projects: projects})
+	actual, _ := Eval(Filter(f)[0], &item, &todoist.Store{Projects: projects})
 	assert.Equal(t, expect, actual, "they should be equal")
 }
 
 func testFilterEvalWithCollaborators(t *testing.T, f string, item todoist.Item, user todoist.User, collaborators todoist.Collaborators, expect bool) {
-	actual, _ := Eval(Filter(f), &item, &todoist.Store{User: user, Collaborators: collaborators})
+	actual, _ := Eval(Filter(f)[0], &item, &todoist.Store{User: user, Collaborators: collaborators})
 	assert.Equal(t, expect, actual, "they should be equal")
 }
 
 func testFilterEvalWithLabel(t *testing.T, f string, item todoist.Item, expect bool) {
-	actual, _ := Eval(Filter(f), &item, &todoist.Store{})
+	actual, _ := Eval(Filter(f)[0], &item, &todoist.Store{})
 	assert.Equal(t, expect, actual, "they should be equal")
 }
 

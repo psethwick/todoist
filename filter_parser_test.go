@@ -9,131 +9,141 @@ import (
 
 // Test ...
 func TestFilter(t *testing.T) {
-	assert.Equal(t, nil, Filter(""), "they should be equal")
+	assert.Equal(t, []Expression{VoidExpr{}}, Filter(""), "they should be equal")
 }
 
 func TestPriorityFilter(t *testing.T) {
-	assert.Equal(t, StringExpr{words: []string{"p1"}}, Filter("p1"), "they should be equal")
-	assert.Equal(t, NoPriorityExpr{}, Filter("No priority"), "they should be equal")
+	assert.Equal(t, []Expression{StringExpr{words: []string{"p1"}}}, Filter("p1"), "they should be equal")
+	assert.Equal(t, []Expression{NoPriorityExpr{}}, Filter("No priority"), "they should be equal")
 }
 
 func TestProjectFilter(t *testing.T) {
 	assert.Equal(t,
-		ProjectExpr{
+		[]Expression{ProjectExpr{
 			isAll: false,
 			name:  "Work",
-		},
+		}},
 		Filter("#Work"), "they should be equal")
 
 	assert.Equal(t,
-		ProjectExpr{
+		[]Expression{ProjectExpr{
 			isAll: false,
 			name:  `Work\s?work`,
-		},
+		}},
 		Filter("#Work work"), "they should be equal")
 
 	assert.Equal(t,
-		ProjectExpr{
+		[]Expression{ProjectExpr{
 			isAll: false,
 			name:  `Work\s?work\s?work`,
-		},
+		}},
 		Filter("#Work work work"), "they should be equal")
 
 	assert.Equal(t,
-		ProjectExpr{
+		[]Expression{ProjectExpr{
 			isAll: true,
 			name:  "Work",
-		},
+		}},
 		Filter("##Work"), "they should be equal")
 
 	assert.Equal(t,
-		ProjectExpr{
+		[]Expression{ProjectExpr{
 			isAll: false,
 			name:  `One\s?&\s?Two`,
-		},
+		}},
 		Filter(`#One \& Two`), "they should be equal")
 
 	assert.Equal(t,
-		ProjectExpr{
+		[]Expression{ProjectExpr{
 			isAll: false,
 			name:  `One\s?\|\s?Two`,
-		},
+		}},
 		Filter(`#One \| Two`), "they should be equal")
 
 	assert.Equal(t,
-		ProjectExpr{
+		[]Expression{ProjectExpr{
 			isAll: false,
 			name:  `One\s?\|\s?Two`,
-		},
+		}},
 		Filter(`#One\|Two`), "they should be equal")
 
 	assert.Equal(t,
-		ProjectExpr{
+		[]Expression{ProjectExpr{
 			isAll: false,
 			name:  "Exclam\\s?!",
-		},
+		}},
 		Filter("#Exclam\\!"), "they should be equal")
 
 	assert.Equal(t,
-		ProjectExpr{
+		[]Expression{ProjectExpr{
 			isAll: false,
 			name:  "Or\\s?\\|",
-		},
+		}},
 		Filter("#Or\\|"), "they should be equal")
 
 	assert.Equal(t,
-		ProjectExpr{
+		[]Expression{ProjectExpr{
 			isAll: false,
 			name:  ".*\\s?ball",
-		},
+		}},
 		Filter("#*ball"), "they should be equal")
 
 	assert.Equal(t,
-		ProjectExpr{
+		[]Expression{ProjectExpr{
 			isAll: false,
 			name:  "base\\s?.*",
-		},
+		}},
 		Filter("#base*"), "they should be equal")
 }
 
 func TestLabelFilter(t *testing.T) {
 	assert.Equal(t,
-		LabelExpr{
-			name: "Test",
+		[]Expression{
+			LabelExpr{
+				name: "Test",
+			},
 		},
 		Filter("@Test"), "they should be equal")
 	assert.Equal(t,
-		LabelExpr{
-			name: "",
+		[]Expression{
+			LabelExpr{
+				name: "",
+			},
 		},
 		Filter("no labels"), "they should be equal")
 }
 
 func TestBoolInfixFilter(t *testing.T) {
 	assert.Equal(t,
-		BoolInfixOpExpr{
-			left:     StringExpr{words: []string{"p1"}},
-			operator: '|',
-			right:    StringExpr{words: []string{"p2"}},
+		[]Expression{
+			BoolInfixOpExpr{
+				left:     StringExpr{words: []string{"p1"}},
+				operator: '|',
+				right:    StringExpr{words: []string{"p2"}},
+			},
 		},
 		Filter("p1 | p2"), "they should be equal")
 
 	assert.Equal(t,
-		BoolInfixOpExpr{
-			left:     StringExpr{words: []string{"p1"}},
-			operator: '&',
-			right:    StringExpr{words: []string{"p2"}},
+		[]Expression{
+			BoolInfixOpExpr{
+				left:     StringExpr{words: []string{"p1"}},
+				operator: '&',
+				right:    StringExpr{words: []string{"p2"}},
+			},
 		},
 		Filter("p1 & p2"), "they should be equal")
 
 	assert.Equal(t,
-		BoolInfixOpExpr{
-			left:     StringExpr{words: []string{"p1"}},
-			operator: '&',
-			right: BoolInfixOpExpr{
-				left:     StringExpr{words: []string{"p2"}},
-				operator: '|',
-				right:    StringExpr{words: []string{"p3"}},
+		[]Expression{
+			BoolInfixOpExpr{
+				left:     StringExpr{words: []string{"p1"}},
+				operator: '&',
+				right: BoolInfixOpExpr{
+					left:     StringExpr{words: []string{"p2"}},
+					operator: '|',
+					right:    StringExpr{words: []string{"p3"}},
+				},
 			},
 		},
 		Filter("p1 & (p2 | p3 )"), "they should be equal")
@@ -148,15 +158,19 @@ func TestDateTimeFilter(t *testing.T) {
 	setNow(timeNow)
 
 	assert.Equal(t,
-		DateExpr{operation: DUE_ON, datetime: time.Date(2017, time.October, 5, 0, 0, 0, 0, testTimeZone), allDay: true},
+		[]Expression{
+			DateExpr{operation: DUE_ON, datetime: time.Date(2017, time.October, 5, 0, 0, 0, 0, testTimeZone), allDay: true},
+		},
 		Filter("10/5/2017"), "they should be equal")
 
 	assert.Equal(
 		t,
-		DateExpr{
-			operation: DUE_ON,
-			datetime:  time.Date(timeNow.Year(), time.January, 3, 0, 0, 0, 0, testTimeZone),
-			allDay:    true,
+		[]Expression{
+			DateExpr{
+				operation: DUE_ON,
+				datetime:  time.Date(timeNow.Year(), time.January, 3, 0, 0, 0, 0, testTimeZone),
+				allDay:    true,
+			},
 		},
 		Filter("Jan 3"),
 		"they should be equal",
@@ -164,29 +178,41 @@ func TestDateTimeFilter(t *testing.T) {
 
 	assert.Equal(
 		t,
-		DateExpr{
-			operation: DUE_ON,
-			datetime:  time.Date(timeNow.Year(), time.August, 8, 0, 0, 0, 0, testTimeZone),
-			allDay:    true,
+		[]Expression{
+			DateExpr{
+				operation: DUE_ON,
+				datetime:  time.Date(timeNow.Year(), time.August, 8, 0, 0, 0, 0, testTimeZone),
+				allDay:    true,
+			},
 		},
 		Filter("8 August"),
 		"they should be equal",
 	)
 
 	assert.Equal(t,
-		DateExpr{operation: DUE_ON, datetime: time.Date(2020, time.February, 10, 0, 0, 0, 0, testTimeZone), allDay: true},
+		[]Expression{
+			DateExpr{operation: DUE_ON, datetime: time.Date(2020, time.February, 10, 0, 0, 0, 0, testTimeZone), allDay: true},
+		},
 		Filter("10 Feb 2020"), "they should be equal")
 
 	assert.Equal(t,
-		DateExpr{operation: DUE_ON, datetime: time.Date(timeNow.Year(), time.May, 16, 0, 0, 0, 0, testTimeZone), allDay: true},
+		[]Expression{
+			DateExpr{
+				operation: DUE_ON,
+				datetime:  time.Date(timeNow.Year(), time.May, 16, 0, 0, 0, 0, testTimeZone),
+				allDay:    true,
+			},
+		},
 		Filter("16/05"), "they should be equal")
 
 	assert.Equal(
 		t,
-		DateExpr{
-			operation: DUE_ON,
-			datetime:  time.Date(timeNow.Year(), timeNow.Month(), timeNow.Day(), 16, 0, 0, 0, testTimeZone),
-			allDay:    false,
+		[]Expression{
+			DateExpr{
+				operation: DUE_ON,
+				datetime:  time.Date(timeNow.Year(), timeNow.Month(), timeNow.Day(), 16, 0, 0, 0, testTimeZone),
+				allDay:    false,
+			},
 		},
 		Filter("16:00"),
 		"they should be equal",
@@ -194,10 +220,12 @@ func TestDateTimeFilter(t *testing.T) {
 
 	assert.Equal(
 		t,
-		DateExpr{
-			operation: DUE_ON,
-			datetime:  time.Date(timeNow.Year(), timeNow.Month(), timeNow.Day(), 16, 10, 3, 0, testTimeZone),
-			allDay:    false,
+		[]Expression{
+			DateExpr{
+				operation: DUE_ON,
+				datetime:  time.Date(timeNow.Year(), timeNow.Month(), timeNow.Day(), 16, 10, 3, 0, testTimeZone),
+				allDay:    false,
+			},
 		},
 		Filter("16:10:03"),
 		"they should be equal",
@@ -205,10 +233,12 @@ func TestDateTimeFilter(t *testing.T) {
 
 	assert.Equal(
 		t,
-		DateExpr{
-			operation: DUE_ON,
-			datetime:  time.Date(timeNow.Year(), timeNow.Month(), timeNow.Day(), 15, 0, 0, 0, testTimeZone),
-			allDay:    false,
+		[]Expression{
+			DateExpr{
+				operation: DUE_ON,
+				datetime:  time.Date(timeNow.Year(), timeNow.Month(), timeNow.Day(), 15, 0, 0, 0, testTimeZone),
+				allDay:    false,
+			},
 		},
 		Filter("3pm"),
 		"they should be equal",
@@ -216,25 +246,31 @@ func TestDateTimeFilter(t *testing.T) {
 
 	assert.Equal(
 		t,
-		DateExpr{
-			operation: DUE_ON,
-			datetime:  time.Date(timeNow.Year(), timeNow.Month(), timeNow.Day(), 7, 0, 0, 0, testTimeZone),
-			allDay:    false,
+		[]Expression{
+			DateExpr{
+				operation: DUE_ON,
+				datetime:  time.Date(timeNow.Year(), timeNow.Month(), timeNow.Day(), 7, 0, 0, 0, testTimeZone),
+				allDay:    false,
+			},
 		},
 		Filter("7am"),
 		"they should be equal",
 	)
 
 	assert.Equal(t,
-		DateExpr{operation: DUE_ON, datetime: time.Date(2020, time.February, 10, 15, 0, 0, 0, testTimeZone), allDay: false},
+		[]Expression{
+			DateExpr{operation: DUE_ON, datetime: time.Date(2020, time.February, 10, 15, 0, 0, 0, testTimeZone), allDay: false},
+		},
 		Filter("10 Feb 2020 3pm"), "they should be equal")
 
 	assert.Equal(
 		t,
-		DateExpr{
-			operation: DUE_ON,
-			datetime:  time.Date(timeNow.Year(), timeNow.Month(), timeNow.Day(), 7, 0, 0, 0, testTimeZone),
-			allDay:    false,
+		[]Expression{
+			DateExpr{
+				operation: DUE_ON,
+				datetime:  time.Date(timeNow.Year(), timeNow.Month(), timeNow.Day(), 7, 0, 0, 0, testTimeZone),
+				allDay:    false,
+			},
 		},
 		Filter("7am"),
 		"they should be equal",
@@ -245,62 +281,94 @@ func TestSpecialDateTimeFilter(t *testing.T) {
 	timeNow := time.Date(2017, time.January, 1, 1, 0, 0, 0, testTimeZone)
 	setNow(timeNow)
 	assert.Equal(t,
-		DateExpr{operation: DUE_ON, datetime: time.Date(2017, time.January, 1, 0, 0, 0, 0, testTimeZone), allDay: true},
+		[]Expression{
+			DateExpr{operation: DUE_ON, datetime: time.Date(2017, time.January, 1, 0, 0, 0, 0, testTimeZone), allDay: true},
+		},
 		Filter("today"), "they should be equal")
 
 	assert.Equal(t,
-		DateExpr{operation: DUE_ON, datetime: time.Date(2017, time.January, 1, 0, 0, 0, 0, testTimeZone), allDay: true},
+		[]Expression{
+			DateExpr{operation: DUE_ON, datetime: time.Date(2017, time.January, 1, 0, 0, 0, 0, testTimeZone), allDay: true},
+		},
 		Filter("tod"), "they should be equal")
 
 	assert.Equal(t,
-		DateExpr{operation: DUE_ON, datetime: time.Date(2017, time.January, 1, 0, 0, 0, 0, testTimeZone), allDay: true},
+		[]Expression{
+			DateExpr{operation: DUE_ON, datetime: time.Date(2017, time.January, 1, 0, 0, 0, 0, testTimeZone), allDay: true},
+		},
 		Filter("Today"), "they should be equal")
 
 	assert.Equal(t,
-		DateExpr{operation: DUE_ON, datetime: time.Date(2017, time.January, 2, 0, 0, 0, 0, testTimeZone), allDay: true},
+		[]Expression{
+			DateExpr{operation: DUE_ON, datetime: time.Date(2017, time.January, 2, 0, 0, 0, 0, testTimeZone), allDay: true},
+		},
 		Filter("tomorrow"), "they should be equal")
 
 	assert.Equal(t,
-		DateExpr{operation: DUE_ON, datetime: time.Date(2017, time.January, 2, 0, 0, 0, 0, testTimeZone), allDay: true},
+		[]Expression{
+			DateExpr{operation: DUE_ON, datetime: time.Date(2017, time.January, 2, 0, 0, 0, 0, testTimeZone), allDay: true},
+		},
 		Filter("tom"), "they should be equal")
 
 	assert.Equal(t,
-		DateExpr{operation: DUE_ON, datetime: time.Date(2016, time.December, 31, 0, 0, 0, 0, testTimeZone), allDay: true},
+		[]Expression{
+			DateExpr{operation: DUE_ON, datetime: time.Date(2016, time.December, 31, 0, 0, 0, 0, testTimeZone), allDay: true},
+		},
 		Filter("yesterday"), "they should be equal")
 
 	assert.Equal(t,
-		DateExpr{operation: DUE_BEFORE, datetime: time.Date(2017, time.January, 15, 0, 0, 0, 0, testTimeZone), allDay: true},
+		[]Expression{
+			DateExpr{
+				operation: DUE_BEFORE,
+				datetime:  time.Date(2017, time.January, 15, 0, 0, 0, 0, testTimeZone),
+				allDay:    true,
+			},
+		},
 		Filter("14 days"), "they should be equal")
 
 	assert.Equal(t,
-		DateExpr{operation: DUE_BEFORE, datetime: time.Date(2017, time.January, 15, 0, 0, 0, 0, testTimeZone), allDay: true},
+		[]Expression{
+			DateExpr{
+				operation: DUE_BEFORE,
+				datetime:  time.Date(2017, time.January, 15, 0, 0, 0, 0, testTimeZone),
+				allDay:    true,
+			},
+		},
 		Filter("next 14 days"), "they should be equal")
 }
 
 func TestNoTime(t *testing.T) {
 	assert.Equal(t,
-		DateExpr{operation: NO_TIME},
+		[]Expression{
+			DateExpr{operation: NO_TIME},
+		},
 		Filter("no time"),
 	)
 }
 
 func TestSubtask(t *testing.T) {
 	assert.Equal(t,
-		SubtaskExpr{},
+		[]Expression{
+			SubtaskExpr{},
+		},
 		Filter("subtask"),
 	)
 }
 
 func TestShared(t *testing.T) {
 	assert.Equal(t,
-		SharedExpr{},
+		[]Expression{
+			SharedExpr{},
+		},
 		Filter("shared"),
 	)
 }
 
 func TestPerson(t *testing.T) {
 	assert.Equal(t,
-		PersonExpr{operation: ASSIGNED_TO, person: "me"},
+		[]Expression{
+			PersonExpr{operation: ASSIGNED_TO, person: "me"},
+		},
 		Filter("assigned to: me"),
 	)
 
@@ -311,36 +379,48 @@ func TestPerson(t *testing.T) {
 	// )
 
 	assert.Equal(t,
-		PersonExpr{operation: ASSIGNED_BY, person: "me"},
+		[]Expression{
+			PersonExpr{operation: ASSIGNED_BY, person: "me"},
+		},
 		Filter("assigned by: me"),
 	)
 
 	assert.Equal(t,
-		PersonExpr{operation: ASSIGNED_TO, person: "Becky"},
+		[]Expression{
+			PersonExpr{operation: ASSIGNED_TO, person: "Becky"},
+		},
 		Filter("assigned to: Becky"),
 	)
 
 	assert.Equal(t,
-		PersonExpr{operation: ADDED_BY, person: "me"},
+		[]Expression{
+			PersonExpr{operation: ADDED_BY, person: "me"},
+		},
 		Filter("added by: me"),
 	)
 
 	assert.Equal(t,
-		PersonExpr{operation: ADDED_BY, person: "Becky"},
+		[]Expression{
+			PersonExpr{operation: ADDED_BY, person: "Becky"},
+		},
 		Filter("added by: Becky"),
 	)
 }
 
 func TestAssigned(t *testing.T) {
 	assert.Equal(t,
-		AssignedExpr{},
+		[]Expression{
+			AssignedExpr{},
+		},
 		Filter("assigned"),
 	)
 }
 
 func TestRecurring(t *testing.T) {
 	assert.Equal(t,
-		RecurringExpr{},
+		[]Expression{
+			RecurringExpr{},
+		},
 		Filter("recurring"),
 	)
 }
@@ -350,10 +430,12 @@ func TestDateTimeElapsedFilter(t *testing.T) {
 	setNow(timeNow)
 	assert.Equal(
 		t,
-		DateExpr{
-			operation: DUE_ON,
-			datetime:  time.Date(timeNow.Year(), timeNow.Month(), timeNow.Day()+1, 16, 0, 0, 0, testTimeZone),
-			allDay:    false,
+		[]Expression{
+			DateExpr{
+				operation: DUE_ON,
+				datetime:  time.Date(timeNow.Year(), timeNow.Month(), timeNow.Day()+1, 16, 0, 0, 0, testTimeZone),
+				allDay:    false,
+			},
 		},
 		Filter("16:00"),
 		"they should be equal",
@@ -362,17 +444,25 @@ func TestDateTimeElapsedFilter(t *testing.T) {
 	timeNow = time.Date(2017, time.May, 16, 23, 59, 59, 0, testTimeZone)
 	setNow(timeNow)
 	assert.Equal(t,
-		DateExpr{operation: DUE_ON, datetime: time.Date(timeNow.Year(), time.May, 16, 0, 0, 0, 0, testTimeZone), allDay: true},
+		[]Expression{
+			DateExpr{
+				operation: DUE_ON,
+				datetime:  time.Date(timeNow.Year(), time.May, 16, 0, 0, 0, 0, testTimeZone),
+				allDay:    true,
+			},
+		},
 		Filter("16/05"), "they should be equal")
 
 	timeNow = time.Date(2017, time.May, 17, 0, 0, 0, 0, testTimeZone)
 	setNow(timeNow)
 	assert.Equal(
 		t,
-		DateExpr{
-			operation: DUE_ON,
-			datetime:  time.Date(timeNow.Year()+1, time.May, 16, 0, 0, 0, 0, testTimeZone),
-			allDay:    true,
+		[]Expression{
+			DateExpr{
+				operation: DUE_ON,
+				datetime:  time.Date(timeNow.Year()+1, time.May, 16, 0, 0, 0, 0, testTimeZone),
+				allDay:    true,
+			},
 		},
 		Filter("16/05"),
 		"they should be equal",
@@ -382,25 +472,33 @@ func TestDateTimeElapsedFilter(t *testing.T) {
 func TestParseWildcard(t *testing.T) {
 	assert.Equal(
 		t,
-		ProjectExpr{name: `.*\s?ball`},
+		[]Expression{
+			ProjectExpr{name: `.*\s?ball`},
+		},
 		Filter("#*ball"),
 	)
 
 	assert.Equal(
 		t,
-		ProjectExpr{name: `base\s?.*`},
+		[]Expression{
+			ProjectExpr{name: `base\s?.*`},
+		},
 		Filter("#base*"),
 	)
 
 	assert.Equal(
 		t,
-		ProjectExpr{name: `b\s?.*\s?ll`},
+		[]Expression{
+			ProjectExpr{name: `b\s?.*\s?ll`},
+		},
 		Filter("#b*ll"),
 	)
 
 	assert.Equal(
 		t,
-		ProjectExpr{name: `b\s?.*\s?all`},
+		[]Expression{
+			ProjectExpr{name: `b\s?.*\s?all`},
+		},
 		Filter("#b*all"),
 	)
 }
@@ -408,7 +506,9 @@ func TestParseWildcard(t *testing.T) {
 func TestWeekday(t *testing.T) {
 	assert.Equal(
 		t,
-		WeekdayExpr{day: time.Tuesday},
+		[]Expression{
+			WeekdayExpr{day: time.Tuesday},
+		},
 		Filter("Tuesday"),
 	)
 }
@@ -416,38 +516,48 @@ func TestWeekday(t *testing.T) {
 func TestSections(t *testing.T) {
 	assert.Equal(
 		t,
-		ProjectExpr{section: "Meetings"},
+		[]Expression{
+			ProjectExpr{section: "Meetings"},
+		},
 		Filter("/Meetings"),
 	)
 
 	assert.Equal(
 		t,
-		ProjectExpr{name: "Work", section: "Meetings"},
+		[]Expression{
+			ProjectExpr{name: "Work", section: "Meetings"},
+		},
 		Filter("#Work/Meetings"),
 	)
 
 	assert.Equal(
 		t,
-		BoolInfixOpExpr{
-			left:     ProjectExpr{name: "Work"},
-			operator: '&',
-			right:    ProjectExpr{section: "Meetings"},
+		[]Expression{
+			BoolInfixOpExpr{
+				left:     ProjectExpr{name: "Work"},
+				operator: '&',
+				right:    ProjectExpr{section: "Meetings"},
+			},
 		},
 		Filter("#Work & /Meetings"),
 	)
 
 	assert.Equal(
 		t,
-		NotOpExpr{expr: ProjectExpr{section: ".*"}},
+		[]Expression{
+			NotOpExpr{expr: ProjectExpr{section: ".*"}},
+		},
 		Filter("!/*"),
 	)
 
 	assert.Equal(
 		t,
-		BoolInfixOpExpr{
-			left:     NotOpExpr{expr: ProjectExpr{section: ".*"}},
-			operator: '&',
-			right:    NotOpExpr{expr: ProjectExpr{name: "Inbox"}},
+		[]Expression{
+			BoolInfixOpExpr{
+				left:     NotOpExpr{expr: ProjectExpr{section: ".*"}},
+				operator: '&',
+				right:    NotOpExpr{expr: ProjectExpr{name: "Inbox"}},
+			},
 		},
 		Filter("!/* & !#Inbox"),
 	)
@@ -458,32 +568,36 @@ func TestComplexFilter(t *testing.T) {
 	setNow(timeNow)
 	assert.Equal(
 		t,
-		BoolInfixOpExpr{
-			left: BoolInfixOpExpr{
+		[]Expression{
+			BoolInfixOpExpr{
 				left: BoolInfixOpExpr{
 					left: BoolInfixOpExpr{
-						left: DateExpr{
-							operation: DUE_ON,
-							datetime:  time.Date(2017, time.January, 2, 0, 0, 0, 0, testTimeZone),
-							allDay:    true,
+						left: BoolInfixOpExpr{
+							left: DateExpr{
+								operation: DUE_ON,
+								datetime:  time.Date(2017, time.January, 2, 0, 0, 0, 0, testTimeZone),
+								allDay:    true,
+							},
+							operator: '|',
+							right: DateExpr{
+								operation: DUE_BEFORE,
+								datetime:  timeNow,
+								allDay:    false,
+							},
 						},
-						operator: '|',
-						right: DateExpr{
-							operation: DUE_BEFORE,
-							datetime:  timeNow,
-							allDay:    false,
+						operator: '&',
+						right: ProjectExpr{
+							isAll: true,
+							name:  "Inbox",
 						},
 					},
 					operator: '&',
-					right: ProjectExpr{
-						isAll: true,
-						name:  "Inbox",
-					}},
-				operator: '&',
-				right: NotOpExpr{
-					expr: PersonExpr{person: "others"},
-				}}, operator: '&',
-			right: NotOpExpr{expr: LabelExpr{name: "me"}},
+					right: NotOpExpr{
+						expr: PersonExpr{person: "others"},
+					},
+				}, operator: '&',
+				right: NotOpExpr{expr: LabelExpr{name: "me"}},
+			},
 		},
 		Filter("(today | overdue) & ##Inbox & (!assigned to: others) & (!@me)"),
 	)
@@ -494,7 +608,7 @@ func TestListExpr(t *testing.T) {
 	setNow(timeNow)
 	assert.Equal(
 		t,
-		ListExpr{exprs: []Expression{
+		[]Expression{
 			DateExpr{
 				datetime: time.Date(2017, time.January, 1, 0, 0, 0, 0, testTimeZone),
 				allDay:   true,
@@ -503,13 +617,13 @@ func TestListExpr(t *testing.T) {
 				datetime: time.Date(2017, time.January, 2, 0, 0, 0, 0, testTimeZone),
 				allDay:   true,
 			},
-		}},
+		},
 		Filter("due: yesterday, today"),
 	)
 
 	assert.Equal(
 		t,
-		ListExpr{exprs: []Expression{
+		[]Expression{
 			ProjectExpr{
 				name: "Work",
 			},
@@ -520,7 +634,7 @@ func TestListExpr(t *testing.T) {
 				datetime: time.Date(2017, time.January, 2, 0, 0, 0, 0, testTimeZone),
 				allDay:   true,
 			},
-		}},
+		},
 		Filter("#Work, #Play, today"),
 	)
 }
@@ -528,7 +642,7 @@ func TestListExpr(t *testing.T) {
 func TestSearchExpr(t *testing.T) {
 	assert.Equal(
 		t,
-		SearchExpr{keyword: "Meeting"},
+		[]Expression{SearchExpr{keyword: "Meeting"}},
 		Filter("search: Meeting"),
 	)
 }
@@ -603,9 +717,10 @@ func TestNoSyntaxErrorAllOfficialExamples(t *testing.T) {
 		"due: yesterday, today",
 	}
 	for _, input := range tests {
-		e := Filter(input)
-		if err, ok := e.(ErrorExpr); ok {
-			assert.True(t, false, input, err.error)
+		for _, e := range Filter(input) {
+			if err, ok := e.(ErrorExpr); ok {
+				assert.True(t, false, input, err.error)
+			}
 		}
 	}
 }
