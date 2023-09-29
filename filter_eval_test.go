@@ -91,6 +91,10 @@ func TestProjectEval(t *testing.T) {
 			HaveParentID: todoist.HaveParentID{ParentID: &[]string{"1"}[0]},
 			Name:         "nested",
 		},
+		todoist.Project{
+			HaveID: todoist.HaveID{ID: "3"},
+			Name:   "Work",
+		},
 	}
 
 	item1 := todoist.Item{}
@@ -99,10 +103,13 @@ func TestProjectEval(t *testing.T) {
 	item2 := todoist.Item{}
 	item2.ProjectID = "2"
 
+	item3 := todoist.Item{}
+	item3.ProjectID = "3"
 	testFilterEvalWithProject(t, "#private", item1, projects, true)
 	testFilterEvalWithProject(t, "#hoge", item1, projects, false)
 	testFilterEvalWithProject(t, "#private", item2, projects, false)
 	testFilterEvalWithProject(t, "##private", item2, projects, true)
+	testFilterEvalWithProject(t, "#Work", item3, projects, true)
 }
 
 func TestBoolInfixOpExp(t *testing.T) {

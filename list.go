@@ -54,7 +54,6 @@ func List(c *cli.Context) error {
 	}
 
 	for _, ex := range Filter(c.String("filter")) {
-		fmt.Printf("%+v\n", ex)
 		itemList := [][]string{}
 		traverseItems(rootItem, func(item *todoist.Item, depth int) {
 			r, err := Eval(ex, item, client.Store)

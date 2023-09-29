@@ -45,8 +45,7 @@ func (a Projects) GetIDsByName(name string, isAll bool) []string {
 	ids := []string{}
 	name = strings.ToLower(name)
 	for _, pjt := range a {
-		// todo perhaps I should not have changed this for eval
-		match, _ := regexp.MatchString(name, pjt.Name)
+		match, _ := regexp.MatchString(name, strings.ToLower(pjt.Name))
 		if match {
 			ids = append(ids, pjt.ID)
 			if isAll {
