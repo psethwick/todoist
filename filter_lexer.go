@@ -210,7 +210,11 @@ func (l *Lexer) Lex(lval *yySymType) int {
 		if _, ok := MonthIdentHash[lowerToken]; ok {
 			token = MONTH_IDENT
 		} else if _, ok := TwelveClockIdentHash[lowerToken]; ok {
-			token = TWELVE_CLOCK_IDENT
+			if l.last == NUMBER {
+				token = TWELVE_CLOCK_IDENT
+			} else {
+				token = STRING
+			}
 		} else if _, ok := TodayIdentHash[lowerToken]; ok {
 			token = TODAY_IDENT
 		} else if _, ok := TomorrowIdentHash[lowerToken]; ok {
@@ -218,7 +222,11 @@ func (l *Lexer) Lex(lval *yySymType) int {
 		} else if _, ok := OverDueHash[lowerToken]; ok {
 			token = OVERDUE
 		} else if _, ok := OrdinalHash[lowerToken]; ok {
-			token = ORDINAL
+			if l.last == NUMBER {
+				token = ORDINAL
+			} else {
+				token = STRING
+			}
 		} else if _, ok := WeekdayHash[lowerToken]; ok {
 			token = WEEKDAY
 		} else if lowerToken == "yesterday" {
@@ -240,9 +248,9 @@ func (l *Lexer) Lex(lval *yySymType) int {
 				token = STRING
 			}
 		} else if lowerToken == "over" {
-			token = OVER
+			token = l.NextMatches(`due`, OVER, STRING)
 		} else if lowerToken == "no" {
-			token = l.NextMatch(`date|time|due date|labels|priority`, NO, STRING)
+			token = l.NextMatches(`date|time|due date|labels|priority`, NO, STRING)
 		} else if lowerToken == "time" {
 			if l.last == NO {
 				token = TIME
@@ -262,7 +270,7 @@ func (l *Lexer) Lex(lval *yySymType) int {
 				token = STRING
 			}
 		} else if lowerToken == "view" {
-			token = VIEW
+			token = l.NextMatches(`all`, VIEW, STRING)
 		} else if lowerToken == "all" {
 			if l.last == VIEW {
 				token = ALL
@@ -270,11 +278,15 @@ func (l *Lexer) Lex(lval *yySymType) int {
 				token = STRING
 			}
 		} else if lowerToken == "added" {
-			token = ADDED
+			token = l.NextMatches(`by`, ADDED, STRING)
 		} else if lowerToken == "assigned" {
 			token = ASSIGNED
 		} else if lowerToken == "to" {
-			token = TO
+			if l.last == ASSIGNED {
+				token = TO
+			} else {
+				token = STRING
+			}
 		} else if lowerToken == "by" {
 			if l.last == ASSIGNED || l.last == ADDED {
 				token = BY
@@ -288,7 +300,7 @@ func (l *Lexer) Lex(lval *yySymType) int {
 		} else if lowerToken == "shared" {
 			token = SHARED
 		} else if lowerToken == "created" {
-			token = CREATED
+			token = l.NextMatches(`before`, CREATED, STRING)
 		} else if lowerToken == "subtask" {
 			token = SUBTASK
 		} else if lowerToken == "priority" {
@@ -331,10 +343,10 @@ func (l *Lexer) IsInString() bool {
 	if offset == 0 {
 		return false
 	}
-	return l.input[offset-1] != ' ' 
+	return l.input[offset-1] != ' '
 }
 
-func (l *Lexer) NextMatch(s string, pass int, fail int) int {
+func (l *Lexer) NextMatches(s string, pass int, fail int) int {
 	offset := l.Pos().Offset
 	match, _ := regexp.MatchString(s, l.input[offset:])
 	if match {
