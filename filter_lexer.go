@@ -1,6 +1,7 @@
 package main
 
 import (
+	"regexp"
 	"strconv"
 	"strings"
 	"text/scanner"
@@ -134,8 +135,9 @@ var timezone = func() *time.Location {
 
 type Lexer struct {
 	scanner.Scanner
-	result []Expression
+	input  string
 	last   int
+	result []Expression
 }
 
 var MonthIdentHash = map[string]time.Month{
@@ -240,7 +242,7 @@ func (l *Lexer) Lex(lval *yySymType) int {
 		} else if lowerToken == "over" {
 			token = OVER
 		} else if lowerToken == "no" {
-			token = NO
+			token = l.NextMatch(`date|time|due date|labels|priority`, NO, STRING)
 		} else if lowerToken == "time" {
 			if l.last == NO {
 				token = TIME
@@ -302,6 +304,12 @@ func (l *Lexer) Lex(lval *yySymType) int {
 		} else {
 			token = STRING
 		}
+	case int('@'):
+		if l.IsInString() {
+			token = STRING
+		} else {
+			token = AT
+		}
 	case scanner.Int:
 		i := atoi(l.TokenText())
 		if i > 2000 {
@@ -315,6 +323,27 @@ func (l *Lexer) Lex(lval *yySymType) int {
 	return token
 }
 
+func (l *Lexer) IsInString() bool {
+	if l.last != STRING {
+		return false
+	}
+	offset := l.Pos().Offset
+	if offset == 0 {
+		return false
+	}
+	return l.input[offset-1] != ' ' 
+}
+
+func (l *Lexer) NextMatch(s string, pass int, fail int) int {
+	offset := l.Pos().Offset
+	match, _ := regexp.MatchString(s, l.input[offset:])
+	if match {
+		return pass
+	} else {
+		return fail
+	}
+}
+
 func (l *Lexer) Error(e string) {
 	l.result = append(l.result, ErrorExpr{e})
 }
@@ -322,6 +351,7 @@ func (l *Lexer) Error(e string) {
 func Filter(f string) (e []Expression) {
 	l := new(Lexer)
 	l.Init(strings.NewReader(f))
+	l.input = f
 	// exclude scanner.ScanFloats because afternoon times in am/pm format trigger float parsing
 	l.Mode = scanner.ScanIdents | scanner.ScanInts
 	yyParse(l)

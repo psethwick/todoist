@@ -22,8 +22,8 @@ import (
 %token<token> MONTH_IDENT TWELVE_CLOCK_IDENT HOURS PRIORITY RECURRING
 %token<token> TODAY_IDENT TOMORROW_IDENT YESTERDAY_IDENT DAYS VIEW ALL
 %token<token> DUE CREATED BEFORE AFTER OVER OVERDUE NO DATE TIME LABELS
-%token<token> SEARCH ORDINAL WEEKDAY YEAR_NUMBER
-%token<token> '#' '@' '\\' '&' '*' '/' ',' '.'
+%token<token> SEARCH ORDINAL WEEKDAY YEAR_NUMBER AT
+%token<token> '#' '\\' '&' '*' '/' ',' '.'
 
 %left STRING
 %left MONTH_IDENT
@@ -259,7 +259,7 @@ s_project_key
     }
 
 s_label_key
-    : '@'
+    : AT
     {
         $$ = $1
     }

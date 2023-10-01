@@ -278,8 +278,8 @@ func TestPersonExprEval(t *testing.T) {
 	testFilterEvalWithCollaborators(t, "assigned to: Bob", todoist.Item{ResponsibleUID: "1"}, user, collaborators, false)
 	testFilterEvalWithCollaborators(t, "assigned to: Bob", todoist.Item{ResponsibleUID: "1"}, user, collaborators, false)
 
-	// testFilterEvalWithCollaborators(t, "assigned to: bob@example.com", todoist.Item{ResponsibleUID: "2"}, user, collaborators, true)
-	// testFilterEvalWithCollaborators(t, "assigned to: alice@example.com", todoist.Item{ResponsibleUID: "2"}, user, collaborators, false)
+	testFilterEvalWithCollaborators(t, "assigned to: bob@example.com", todoist.Item{ResponsibleUID: "2"}, user, collaborators, true)
+	testFilterEvalWithCollaborators(t, "assigned to: alice@example.com", todoist.Item{ResponsibleUID: "2"}, user, collaborators, false)
 
 	testFilterEvalWithCollaborators(t, "assigned to: Definitely a Name", todoist.Item{ResponsibleUID: "3"}, user, collaborators, true)
 	testFilterEvalWithCollaborators(t, "assigned to: Definitely a Name", todoist.Item{ResponsibleUID: "2"}, user, collaborators, false)
@@ -297,10 +297,10 @@ func TestPersonExprEval(t *testing.T) {
 	testFilterEvalWithCollaborators(t, "assigned by: Alice", todoist.Item{AssignedByUID: "1"}, user, collaborators, true)
 	testFilterEvalWithCollaborators(t, "assigned by: Bob", todoist.Item{AssignedByUID: "1"}, user, collaborators, false)
 	testFilterEvalWithCollaborators(t, "assigned by: Bob", todoist.Item{AssignedByUID: "1"}, user, collaborators, false)
-	//
-	// testFilterEvalWithCollaborators(t, "assigned by: bob@example.com", todoist.Item{AssignedByUID: "2"}, user, collaborators, true)
-	// testFilterEvalWithCollaborators(t, "assigned by: alice@example.com", todoist.Item{AssignedByUID: "2"}, user, collaborators, false)
-	//
+
+	testFilterEvalWithCollaborators(t, "assigned by: bob@example.com", todoist.Item{AssignedByUID: "2"}, user, collaborators, true)
+	testFilterEvalWithCollaborators(t, "assigned by: alice@example.com", todoist.Item{AssignedByUID: "2"}, user, collaborators, false)
+
 	testFilterEvalWithCollaborators(t, "assigned by: Definitely a Name", todoist.Item{AssignedByUID: "3"}, user, collaborators, true)
 	testFilterEvalWithCollaborators(t, "assigned by: Definitely a Name", todoist.Item{AssignedByUID: "2"}, user, collaborators, false)
 
@@ -318,8 +318,8 @@ func TestPersonExprEval(t *testing.T) {
 	testFilterEvalWithCollaborators(t, "added by: Bob", todoist.Item{BaseItem: todoist.BaseItem{UserID: "1"}}, user, collaborators, false)
 	testFilterEvalWithCollaborators(t, "added by: Bob", todoist.Item{BaseItem: todoist.BaseItem{UserID: "1"}}, user, collaborators, false)
 
-	// testFilterEvalWithCollaborators(t, "added by: bob@example.com", todoist.Item{BaseItem: todoist.BaseItem{UserID: "2"}}, user, collaborators, true)
-	// testFilterEvalWithCollaborators(t, "added by: alice@example.com", todoist.Item{BaseItem: todoist.BaseItem{UserID: "2"}}, user, collaborators, false)
+	testFilterEvalWithCollaborators(t, "added by: bob@example.com", todoist.Item{BaseItem: todoist.BaseItem{UserID: "2"}}, user, collaborators, true)
+	testFilterEvalWithCollaborators(t, "added by: alice@example.com", todoist.Item{BaseItem: todoist.BaseItem{UserID: "2"}}, user, collaborators, false)
 
 	testFilterEvalWithCollaborators(t, "added by: Definitely a Name", todoist.Item{BaseItem: todoist.BaseItem{UserID: "3"}}, user, collaborators, true)
 	testFilterEvalWithCollaborators(t, "added by: Definitely a Name", todoist.Item{BaseItem: todoist.BaseItem{UserID: "2"}}, user, collaborators, false)
