@@ -3,20 +3,24 @@ package main
 import (
 	"regexp"
 	"strconv"
+	"strings"
 	"time"
 
-	"github.com/sachaos/todoist/lib"
+	todoist "github.com/sachaos/todoist/lib"
 )
 
 var priorityRegex = regexp.MustCompile("^p([1-4])$")
 
-func Eval(e Expression, item todoist.AbstractItem, projects todoist.Projects) (result bool, err error) {
+func Eval(e Expression, item todoist.AbstractItem, store *todoist.Store) (result bool, err error) {
 	result = false
 	switch e.(type) {
 	case BoolInfixOpExpr:
 		e := e.(BoolInfixOpExpr)
-		lr, err := Eval(e.left, item, projects)
-		rr, err := Eval(e.right, item, projects)
+		lr, err := Eval(e.left, item, store)
+		if err != nil {
+			return false, nil
+		}
+		rr, err := Eval(e.right, item, store)
 		if err != nil {
 			return false, nil
 		}
@@ -26,9 +30,36 @@ func Eval(e Expression, item todoist.AbstractItem, projects todoist.Projects) (r
 		case '|':
 			return lr || rr, nil
 		}
+	case AssignedExpr:
+		return item.(*todoist.Item).ResponsibleUID != nil, nil
+	case NoPriorityExpr:
+		return item.(*todoist.Item).Priority == 1, nil
+	case RecurringExpr:
+		due := item.(*todoist.Item).Due
+		if due == nil {
+			return false, nil
+		}
+		return due.IsRecurring, nil
+	case SubtaskExpr:
+		parentId := item.(*todoist.Item).HaveParentID.ParentID
+		return parentId != nil, nil
+	case WeekdayExpr:
+		due := item.DateTime()
+		if (due == time.Time{}) {
+			return false, nil
+		}
+		return due.Weekday() == e.(WeekdayExpr).day, nil
+	case SearchExpr:
+		keywords := e.(SearchExpr).keyword
+		content := item.(*todoist.Item).Content
+		match, _ := regexp.MatchString(keywords, content)
+		return match, nil
+	case PersonExpr:
+		e := e.(PersonExpr)
+		return EvalPerson(e, item.(*todoist.Item), store.User, store.Collaborators), err
 	case ProjectExpr:
 		e := e.(ProjectExpr)
-		return EvalProject(e, item.GetProjectID(), projects), err
+		return EvalProject(e, item.GetProjectID(), store.Projects), err
 	case LabelExpr:
 		e := e.(LabelExpr)
 		return EvalLabel(e, item.GetLabelNames()), err
@@ -43,21 +74,72 @@ func Eval(e Expression, item todoist.AbstractItem, projects todoist.Projects) (r
 		}
 	case DateExpr:
 		e := e.(DateExpr)
-		return EvalDate(e, item.DateTime()), err
+		return EvalDate(e, item), err
 	case NotOpExpr:
 		e := e.(NotOpExpr)
-		r, err := Eval(e.expr, item, projects)
+		r, err := Eval(e.expr, item, store)
 		if err != nil {
 			return false, nil
 		}
 		return !r, nil
+	case ViewAllExpr:
+		return true, nil
 	default:
 		return true, err
 	}
 	return
 }
 
-func EvalDate(e DateExpr, itemDate time.Time) (result bool) {
+func doesPersonMatch(e PersonExpr, user todoist.User, collaborators todoist.Collaborators, id string) bool {
+	switch strings.ToLower(e.person) {
+	case "me":
+		return id == user.ID
+	case "others":
+		return id != "" && id != user.ID
+	default:
+		for _, c := range collaborators {
+			matchEmail, _ := regexp.MatchString(e.person, c.Email)
+			if matchEmail {
+				return id == c.ID
+			}
+			matchName, _ := regexp.MatchString(e.person, c.FullName)
+			if matchName {
+				return id == c.ID
+			}
+		}
+		return false
+	}
+}
+
+func EvalPerson(e PersonExpr, item *todoist.Item, user todoist.User, collaborators todoist.Collaborators) (result bool) {
+	switch e.operation {
+	case ASSIGNED_BY:
+		return doesPersonMatch(e, user, collaborators, item.AssignedByUID)
+	case ASSIGNED_TO:
+		id, ok := item.ResponsibleUID.(string)
+		if !ok {
+			return false
+		}
+		return doesPersonMatch(e, user, collaborators, id)
+	case ADDED_BY:
+		return doesPersonMatch(e, user, collaborators, item.UserID)
+	}
+	return true
+}
+
+func EvalDate(e DateExpr, item todoist.AbstractItem) (result bool) {
+	itemDate := item.DateTime()
+	if e.operation == NO_TIME {
+		i := item.(*todoist.Item)
+		if i.Due == nil {
+			// no date is also no time
+			return true
+		} else {
+			_, err := time.Parse(time.DateOnly, i.Due.Date)
+			return err == nil // only a date
+		}
+	}
+
 	if (itemDate == time.Time{}) {
 		return e.operation == NO_DUE_DATE
 	}
@@ -88,7 +170,7 @@ func EvalDate(e DateExpr, itemDate time.Time) (result bool) {
 }
 
 func EvalAsPriority(e StringExpr, item *todoist.Item) (result bool) {
-	matched := priorityRegex.FindStringSubmatch(e.literal)
+	matched := priorityRegex.FindStringSubmatch(e.String())
 	if len(matched) == 0 {
 		return false
 	} else {

@@ -45,9 +45,7 @@ func List(c *cli.Context) error {
 		projectIds[i] = project.GetID()
 	}
 	projectColorHash := GenerateColorHash(projectIds, colorList)
-	ex := Filter(c.String("filter"))
 
-	itemList := [][]string{}
 	rootItem := client.Store.RootItem
 
 	if rootItem == nil {
@@ -55,40 +53,42 @@ func List(c *cli.Context) error {
 		return nil
 	}
 
-	traverseItems(rootItem, func(item *todoist.Item, depth int) {
-		r, err := Eval(ex, item, client.Store.Projects)
-		if err != nil {
-			return
+	for _, ex := range Filter(c.String("filter")) {
+		itemList := [][]string{}
+		traverseItems(rootItem, func(item *todoist.Item, depth int) {
+			r, err := Eval(ex, item, client.Store)
+			if err != nil {
+				return
+			}
+			if !r || item.Checked {
+				return
+			}
+			itemList = append(itemList, []string{
+				IdFormat(item),
+				PriorityFormat(item.Priority),
+				DueDateFormat(item.DateTime(), item.AllDay),
+				ProjectFormat(item.ProjectID, client.Store, projectColorHash, c) +
+					SectionFormat(item.SectionID, client.Store, c),
+				item.LabelsString(client.Store),
+				ContentPrefix(client.Store, item, depth, c) + ContentFormat(item),
+			})
+		}, 0)
+
+		if c.Bool("priority") == true {
+			// sort output by priority
+			// and no need to use "else block" as items returned by API are already sorted by task id
+			sortItems(&itemList, 1)
 		}
-		if !r || item.Checked {
-			return
+
+		defer writer.Flush()
+
+		if c.Bool("header") {
+			writer.Write([]string{"ID", "Priority", "DueDate", "Project", "Labels", "Content"})
 		}
-		itemList = append(itemList, []string{
-			IdFormat(item),
-			PriorityFormat(item.Priority),
-			DueDateFormat(item.DateTime(), item.AllDay),
-			ProjectFormat(item.ProjectID, client.Store, projectColorHash, c) +
-				SectionFormat(item.SectionID, client.Store, c),
-			item.LabelsString(client.Store),
-			ContentPrefix(client.Store, item, depth, c) + ContentFormat(item),
-		})
-	}, 0)
 
-	if c.Bool("priority") == true {
-		// sort output by priority
-		// and no need to use "else block" as items returned by API are already sorted by task id
-		sortItems(&itemList, 1)
+		for _, strings := range itemList {
+			writer.Write(strings)
+		}
 	}
-
-	defer writer.Flush()
-
-	if c.Bool("header") {
-		writer.Write([]string{"ID", "Priority", "DueDate", "Project", "Labels", "Content"})
-	}
-
-	for _, strings := range itemList {
-		writer.Write(strings)
-	}
-
 	return nil
 }
