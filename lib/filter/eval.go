@@ -1,4 +1,4 @@
-package main
+package filter
 
 import (
 	"regexp"
@@ -175,7 +175,7 @@ func EvalAsPriority(e StringExpr, item *todoist.Item) (result bool) {
 		return false
 	} else {
 		p, _ := strconv.Atoi(matched[1])
-		if p == priorityMapping[item.Priority] {
+		if p == todoist.PriorityMapping[item.Priority] {
 			return true
 		}
 	}

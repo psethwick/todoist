@@ -4,6 +4,7 @@ import (
 	"context"
 
 	todoist "github.com/sachaos/todoist/lib"
+	"github.com/sachaos/todoist/lib/filter"
 
 	"github.com/urfave/cli/v2"
 )
@@ -30,9 +31,9 @@ func CompletedList(c *cli.Context) error {
 		writer.Write([]string{"ID", "CompletedDate", "Project", "Content"})
 	}
 
-	for _, ex := range Filter(c.String("filter")) {
+	for _, ex := range filter.Filter(c.String("filter")) {
 		for _, item := range completed.Items {
-			result, err := Eval(ex, item, client.Store)
+			result, err := filter.Eval(ex, item, client.Store)
 			if err != nil {
 				return err
 			}

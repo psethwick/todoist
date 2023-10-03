@@ -1,5 +1,5 @@
 %{
-package main 
+package filter 
 
 import (
     "time"

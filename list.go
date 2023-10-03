@@ -5,8 +5,10 @@ import (
 	"os"
 
 	"github.com/acarl005/stripansi"
-	todoist "github.com/sachaos/todoist/lib"
 	"github.com/urfave/cli/v2"
+
+	todoist "github.com/sachaos/todoist/lib"
+	"github.com/sachaos/todoist/lib/filter"
 )
 
 func traverseItems(item *todoist.Item, f func(item *todoist.Item, depth int), depth int) {
@@ -53,10 +55,10 @@ func List(c *cli.Context) error {
 		return nil
 	}
 
-	for _, ex := range Filter(c.String("filter")) {
+	for _, ex := range filter.Filter(c.String("filter")) {
 		itemList := [][]string{}
 		traverseItems(rootItem, func(item *todoist.Item, depth int) {
-			r, err := Eval(ex, item, client.Store)
+			r, err := filter.Eval(ex, item, client.Store)
 			if err != nil {
 				return
 			}
