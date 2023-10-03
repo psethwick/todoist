@@ -2,6 +2,7 @@ package todoist
 
 import (
 	"context"
+	"regexp"
 	"strings"
 )
 
@@ -44,7 +45,8 @@ func (a Projects) GetIDsByName(name string, isAll bool) []string {
 	ids := []string{}
 	name = strings.ToLower(name)
 	for _, pjt := range a {
-		if strings.Contains(strings.ToLower(pjt.Name), name) {
+		match, _ := regexp.MatchString(name, strings.ToLower(pjt.Name))
+		if match {
 			ids = append(ids, pjt.ID)
 			if isAll {
 				parentID := pjt.ID

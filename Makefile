@@ -11,7 +11,7 @@ build: prepare
 
 .PHONY: test
 test: prepare
-	go test -v
+	go test -v ./...
 
 .PHONY: prepare
 prepare: filter_parser.go
@@ -24,9 +24,9 @@ release: prepare
 	GOOS=linux GOARCH=amd64 go build -o $(ARTIFACTS_DIR)/todoist_linux_amd64
 	ghr -u $(GITHUB_USERNAME) -t $(shell cat github_token) --replace ${VERSION} $(ARTIFACTS_DIR)
 
-filter_parser.go: filter_parser.y
+filter_parser.go: lib/filter/parser.y
 	go get golang.org/x/tools/cmd/goyacc
-	goyacc -o filter_parser.go filter_parser.y
+	goyacc -o lib/filter/parser.go lib/filter/parser.y
 	rm y.output
 
 docker-build:

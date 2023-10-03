@@ -9,6 +9,13 @@ import (
 
 var linkRegex = regexp.MustCompile(`\[(.*?)\]\((.*?)\)`)
 
+var PriorityMapping = map[int]int{
+	1: 4,
+	2: 3,
+	3: 2,
+	4: 1,
+}
+
 const (
 	RFC3339Date                 = "2006-01-02"
 	RFC3339DateTime             = "2006-01-02T15:04:05"

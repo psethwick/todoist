@@ -4,7 +4,7 @@ import (
 	"context"
 	"strings"
 
-	"github.com/sachaos/todoist/lib"
+	todoist "github.com/sachaos/todoist/lib"
 	"github.com/urfave/cli/v2"
 )
 
@@ -26,7 +26,7 @@ func Modify(c *cli.Context) error {
 	}
 	item.Content = c.String("content")
 	item.Description = c.String("description")
-	item.Priority = priorityMapping[c.Int("priority")]
+	item.Priority = todoist.PriorityMapping[c.Int("priority")]
 	item.LabelNames = func(str string) []string {
 		stringNames := strings.Split(str, ",")
 		names := []string{}

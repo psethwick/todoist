@@ -4,16 +4,9 @@ import (
 	"context"
 	"strings"
 
-	"github.com/sachaos/todoist/lib"
+	todoist "github.com/sachaos/todoist/lib"
 	"github.com/urfave/cli/v2"
 )
-
-var priorityMapping = map[int]int{
-	1: 4,
-	2: 3,
-	3: 2,
-	4: 1,
-}
 
 func Add(c *cli.Context) error {
 	client := GetClient(c)
@@ -25,7 +18,7 @@ func Add(c *cli.Context) error {
 
 	item.Content = c.Args().First()
 	item.Description = c.String("description")
-	item.Priority = priorityMapping[c.Int("priority")]
+	item.Priority = todoist.PriorityMapping[c.Int("priority")]
 	item.ProjectID = c.String("project-id")
 	if item.ProjectID == "" {
 		item.ProjectID = client.Store.Projects.GetIDByName(c.String("project-name"))
