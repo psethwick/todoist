@@ -31,18 +31,13 @@ func Eval(e Expression, item todoist.AbstractItem, store *todoist.Store) (result
 			return lr || rr, nil
 		}
 	case AssignedExpr:
-		return item.(*todoist.Item).ResponsibleUID != nil, nil
+		return item.GetResponsibleUID() != "", nil
 	case NoPriorityExpr:
-		return item.(*todoist.Item).Priority == 1, nil
+		return item.HasPriority(), nil
 	case RecurringExpr:
-		due := item.(*todoist.Item).Due
-		if due == nil {
-			return false, nil
-		}
-		return due.IsRecurring, nil
+		return item.IsRecurring(), nil
 	case SubtaskExpr:
-		parentId := item.(*todoist.Item).HaveParentID.ParentID
-		return parentId != nil, nil
+		return item.HasParent(), nil
 	case WeekdayExpr:
 		due := item.DateTime()
 		if (due == time.Time{}) {
@@ -51,12 +46,10 @@ func Eval(e Expression, item todoist.AbstractItem, store *todoist.Store) (result
 		return due.Weekday() == e.(WeekdayExpr).day, nil
 	case SearchExpr:
 		keywords := e.(SearchExpr).keyword
-		content := item.(*todoist.Item).Content
-		match, _ := regexp.MatchString(keywords, content)
-		return match, nil
+		return item.SearchMatches(keywords), nil
 	case PersonExpr:
 		e := e.(PersonExpr)
-		return EvalPerson(e, item.(*todoist.Item), store.User, store.Collaborators), err
+		return EvalPerson(e, item, store.User, store.Collaborators), err
 	case ProjectExpr:
 		e := e.(ProjectExpr)
 		return EvalProject(e, item.GetProjectID(), store.Projects), err
@@ -70,6 +63,7 @@ func Eval(e Expression, item todoist.AbstractItem, store *todoist.Store) (result
 			e := e.(StringExpr)
 			return EvalAsPriority(e, item), err
 		default:
+			// CompletedItem
 			return false, nil
 		}
 	case DateExpr:
@@ -111,18 +105,18 @@ func doesPersonMatch(e PersonExpr, user todoist.User, collaborators todoist.Coll
 	}
 }
 
-func EvalPerson(e PersonExpr, item *todoist.Item, user todoist.User, collaborators todoist.Collaborators) (result bool) {
+func EvalPerson(e PersonExpr, item todoist.AbstractItem, user todoist.User, collaborators todoist.Collaborators) (result bool) {
 	switch e.operation {
 	case ASSIGNED_BY:
-		return doesPersonMatch(e, user, collaborators, item.AssignedByUID)
+		return doesPersonMatch(e, user, collaborators, item.GetAssignedByUID())
 	case ASSIGNED_TO:
-		id, ok := item.ResponsibleUID.(string)
-		if !ok {
+		id := item.GetResponsibleUID()
+		if id == "" {
 			return false
 		}
 		return doesPersonMatch(e, user, collaborators, id)
 	case ADDED_BY:
-		return doesPersonMatch(e, user, collaborators, item.UserID)
+		return doesPersonMatch(e, user, collaborators, item.GetUserID())
 	}
 	return true
 }
@@ -130,14 +124,7 @@ func EvalPerson(e PersonExpr, item *todoist.Item, user todoist.User, collaborato
 func EvalDate(e DateExpr, item todoist.AbstractItem) (result bool) {
 	itemDate := item.DateTime()
 	if e.operation == NO_TIME {
-		i := item.(*todoist.Item)
-		if i.Due == nil {
-			// no date is also no time
-			return true
-		} else {
-			_, err := time.Parse(time.DateOnly, i.Due.Date)
-			return err == nil // only a date
-		}
+		return item.HasTime()
 	}
 
 	if (itemDate == time.Time{}) {

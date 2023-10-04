@@ -66,6 +66,43 @@ func (item CompletedItem) GetLabelNames() []string {
 	return []string{}
 }
 
+func (item CompletedItem) GetAssignedByUID() string {
+	return ""
+}
+
+func (item CompletedItem) GetResponsibleUID() string {
+	return ""
+}
+
+func (item CompletedItem) GetUserID() string {
+	return item.UserID
+}
+
+func (item CompletedItem) HasParent() bool {
+	return false
+}
+
+func (item CompletedItem) HasPriority() bool {
+	return false
+}
+
+func (item CompletedItem) HasTime() bool {
+	return false
+}
+
+func (item CompletedItem) IsRecurring() bool {
+	return false
+}
+
+func (item BaseItem) SearchMatches(re string) bool {
+	match, _ := regexp.MatchString(re, item.GetContent())
+	return match
+}
+
+func (item CompletedItem) SearchMatches(re string) bool {
+	return item.BaseItem.SearchMatches(re)
+}
+
 type CompletedItems []CompletedItem
 
 type Item struct {
@@ -139,11 +176,73 @@ func (item Item) GetLabelNames() []string {
 	return item.LabelNames
 }
 
+func (item Item) HasTime() bool {
+	if item.Due == nil {
+		// no date is also no time
+		return true
+	} else {
+		_, err := time.Parse(time.DateOnly, item.Due.Date)
+		return err == nil // only a date
+	}
+}
+
+func (item Item) SearchMatches(re string) bool {
+	return item.BaseItem.SearchMatches(re)
+}
+
+func (item Item) GetResponsibleUID() string {
+	id, ok := item.ResponsibleUID.(string)
+	if !ok {
+		return ""
+	}
+	return id
+}
+
+func (item Item) HasPriority() bool {
+	return item.Priority == 1
+}
+
+func (item Item) IsRecurring() bool {
+	due := item.Due
+	if due == nil {
+		return false
+	}
+	return due.IsRecurring
+}
+
+func (item Item) GetContent() string {
+	return item.Content
+}
+
+func (item Item) HasParent() bool {
+	if item.HaveParentID.ParentID == nil {
+		return false
+	}
+	return *item.HaveParentID.ParentID != ""
+}
+
+func (item Item) GetAssignedByUID() string {
+	return item.AssignedByUID
+}
+
+func (item Item) GetUserID() string {
+	return item.UserID
+}
+
 // interface for Eval actions
 type AbstractItem interface {
 	DateTime() time.Time
 	GetProjectID() string
 	GetLabelNames() []string
+	HasTime() bool
+	GetResponsibleUID() string
+	SearchMatches(string) bool
+	HasPriority() bool
+	IsRecurring() bool
+	GetContent() string
+	HasParent() bool
+	GetAssignedByUID() string
+	GetUserID() string
 }
 
 func GetContentTitle(item ContentCarrier) string {
