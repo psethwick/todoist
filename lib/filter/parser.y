@@ -17,12 +17,12 @@ import (
 %type<expr> s_datetime s_date s_date_year
 %type<expr> s_overdue s_nodate s_project_key s_project_all_key 
 %type<expr> s_time s_person s_label_key s_no_labels s_string 
-%type<expr> s_special_chars
+%type<expr> s_special_chars s_priority
 %token<token> BY TO ADDED ASSIGNED SUBTASK SHARED STRING NUMBER NEXT
 %token<token> MONTH_IDENT TWELVE_CLOCK_IDENT HOURS PRIORITY RECURRING
 %token<token> TODAY_IDENT TOMORROW_IDENT YESTERDAY_IDENT DAYS VIEW ALL
 %token<token> DUE CREATED BEFORE AFTER OVER OVERDUE NO DATE TIME LABELS
-%token<token> SEARCH ORDINAL WEEKDAY YEAR_NUMBER AT
+%token<token> SEARCH ORDINAL WEEKDAY YEAR_NUMBER AT P1 P2 P3 P4
 %token<token> '#' '\\' '&' '*' '/' ',' '.'
 
 %left STRING
@@ -173,7 +173,30 @@ expr
     | s_person
     | s_datetime
     | s_string
+    | s_priority
 
+
+s_priority
+    : PRIORITY NUMBER
+    {
+        $$ = PriorityExpr{atoi($2.literal)}
+    }
+    | P1
+    {
+        $$ = PriorityExpr{1}
+    }
+    | P2
+    {
+        $$ = PriorityExpr{2}
+    }
+    | P3
+    {
+        $$ = PriorityExpr{3}
+    }
+    | P4
+    {
+        $$ = PriorityExpr{4}
+    }
 
 s_special_chars
     : '\\' '&'

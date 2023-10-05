@@ -2,14 +2,11 @@ package filter
 
 import (
 	"regexp"
-	"strconv"
 	"strings"
 	"time"
 
 	todoist "github.com/sachaos/todoist/lib"
 )
-
-var priorityRegex = regexp.MustCompile("^p([1-4])$")
 
 func Eval(e Expression, item todoist.AbstractItem, store *todoist.Store) (result bool, err error) {
 	result = false
@@ -56,12 +53,11 @@ func Eval(e Expression, item todoist.AbstractItem, store *todoist.Store) (result
 	case LabelExpr:
 		e := e.(LabelExpr)
 		return EvalLabel(e, item.GetLabelNames()), err
-	case StringExpr:
+	case PriorityExpr:
 		switch item.(type) {
 		case *todoist.Item:
 			item := item.(*todoist.Item)
-			e := e.(StringExpr)
-			return EvalAsPriority(e, item), err
+			return e.(PriorityExpr).priority == todoist.PriorityMapping[item.Priority], err
 		default:
 			// CompletedItem
 			return false, nil
@@ -154,19 +150,6 @@ func EvalDate(e DateExpr, item todoist.AbstractItem) (result bool) {
 	default:
 		return false
 	}
-}
-
-func EvalAsPriority(e StringExpr, item *todoist.Item) (result bool) {
-	matched := priorityRegex.FindStringSubmatch(e.String())
-	if len(matched) == 0 {
-		return false
-	} else {
-		p, _ := strconv.Atoi(matched[1])
-		if p == todoist.PriorityMapping[item.Priority] {
-			return true
-		}
-	}
-	return false
 }
 
 func EvalProject(e ProjectExpr, projectID string, projects todoist.Projects) bool {

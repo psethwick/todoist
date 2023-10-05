@@ -26,6 +26,9 @@ type ViewAllExpr struct{}
 
 type NoPriorityExpr struct{}
 
+type PriorityExpr struct {
+	priority int
+}
 type AssignedExpr struct{}
 
 type RecurringExpr struct{}
@@ -54,7 +57,7 @@ func (se StringExpr) Add(other StringExpr) StringExpr {
 }
 
 func (se StringExpr) String() string {
-	return strings.Join(se.words, "\\s?")
+	return strings.Join(se.words, `\s?`)
 }
 
 type personOperation int
@@ -229,6 +232,8 @@ func (l *Lexer) Lex(lval *yySymType) int {
 			}
 		} else if _, ok := WeekdayHash[lowerToken]; ok {
 			token = WEEKDAY
+		} else if _, ok := WeekdayHash[lowerToken]; ok {
+			token = WEEKDAY
 		} else if lowerToken == "yesterday" {
 			token = YESTERDAY_IDENT
 		} else if lowerToken == "due" {
@@ -250,7 +255,7 @@ func (l *Lexer) Lex(lval *yySymType) int {
 		} else if lowerToken == "over" {
 			token = l.NextMatches(`due`, OVER, STRING)
 		} else if lowerToken == "no" {
-			token = l.NextMatches(`date|time|due date|labels|priority`, NO, STRING)
+			token = l.NextMatches(`[dD]ate|[tT]ime|[dD]ue [dD]ate|[lL]abels|[pP]riority`, NO, STRING)
 		} else if lowerToken == "time" {
 			if l.last == NO {
 				token = TIME
@@ -270,7 +275,7 @@ func (l *Lexer) Lex(lval *yySymType) int {
 				token = STRING
 			}
 		} else if lowerToken == "view" {
-			token = l.NextMatches(`all`, VIEW, STRING)
+			token = l.NextMatches(`[aA]ll`, VIEW, STRING)
 		} else if lowerToken == "all" {
 			if l.last == VIEW {
 				token = ALL
@@ -278,7 +283,7 @@ func (l *Lexer) Lex(lval *yySymType) int {
 				token = STRING
 			}
 		} else if lowerToken == "added" {
-			token = l.NextMatches(`by`, ADDED, STRING)
+			token = l.NextMatches(`[bB]y`, ADDED, STRING)
 		} else if lowerToken == "assigned" {
 			token = ASSIGNED
 		} else if lowerToken == "to" {
@@ -300,15 +305,25 @@ func (l *Lexer) Lex(lval *yySymType) int {
 		} else if lowerToken == "shared" {
 			token = SHARED
 		} else if lowerToken == "created" {
-			token = l.NextMatches(`before`, CREATED, STRING)
+			token = l.NextMatches(`[bB]efore`, CREATED, STRING)
 		} else if lowerToken == "subtask" {
 			token = SUBTASK
 		} else if lowerToken == "priority" {
-			if l.last == NO {
+			offset := l.Pos().Offset
+			match, _ := regexp.MatchString(`\d.*$`, l.input[offset:])
+			if l.last == NO || match {
 				token = PRIORITY
 			} else {
 				token = STRING
 			}
+		} else if lowerToken == "p1" {
+			token = P1
+		} else if lowerToken == "p2" {
+			token = P2
+		} else if lowerToken == "p3" {
+			token = P3
+		} else if lowerToken == "p4" {
+			token = P4
 		} else if lowerToken == "recurring" {
 			token = RECURRING
 		} else if lowerToken == "search" {

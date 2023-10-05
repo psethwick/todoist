@@ -95,7 +95,7 @@ func (item CompletedItem) IsRecurring() bool {
 }
 
 func (item BaseItem) SearchMatches(re string) bool {
-	match, _ := regexp.MatchString(re, item.GetContent())
+	match, _ := regexp.MatchString(strings.ToLower(re), strings.ToLower(item.GetContent()))
 	return match
 }
 
@@ -178,8 +178,8 @@ func (item Item) GetLabelNames() []string {
 
 func (item Item) HasTime() bool {
 	if item.Due == nil {
-		// no date is also no time
-		return true
+		// no time doesn't apply if no due date
+		return false
 	} else {
 		_, err := time.Parse(time.DateOnly, item.Due.Date)
 		return err == nil // only a date
