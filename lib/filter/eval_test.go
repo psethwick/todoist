@@ -51,6 +51,9 @@ func TestEval(t *testing.T) {
 func TestPriorityEval(t *testing.T) {
 	testFilterEval(t, "p4", todoist.Item{Priority: 1}, true)
 	testFilterEval(t, "p3", todoist.Item{Priority: 1}, false)
+
+	testFilterEval(t, "priority 1", todoist.Item{Priority: 4}, true)
+	testFilterEval(t, "priority 4", todoist.Item{Priority: 1}, true)
 }
 
 func TestLabelEval(t *testing.T) {
@@ -142,7 +145,8 @@ func TestNoTimeExp(t *testing.T) {
 	// midnight is a time
 	testFilterEval(t, "no time", todoist.Item{Due: due("Sun 1 Oct 2017 15:00:00 +0000")}, false)
 
-	testFilterEval(t, "no time", todoist.Item{}, true)
+	// no due date doesn't count
+	testFilterEval(t, "no time", todoist.Item{}, false)
 	// actually no time
 	testFilterEval(t, "no time", todoist.Item{Due: &todoist.Due{Date: "2015-03-15"}}, true)
 }
@@ -239,6 +243,11 @@ func TestSearchEval(t *testing.T) {
 	testFilterEval(t, "search: work on*project", todoist.Item{BaseItem: todoist.BaseItem{Content: "work on that project"}}, true)
 	testFilterEval(t, "search: work on*project", todoist.Item{BaseItem: todoist.BaseItem{Content: "work on that other project"}}, true)
 	testFilterEval(t, "search: work on * other project", todoist.Item{BaseItem: todoist.BaseItem{Content: "work on that project"}}, false)
+
+	// search should be case insensitive
+	testFilterEval(t, "search: Work", todoist.Item{BaseItem: todoist.BaseItem{Content: "work on that project"}}, true)
+	testFilterEval(t, "search: work", todoist.Item{BaseItem: todoist.BaseItem{Content: "Work on that project"}}, true)
+
 }
 
 func TestPersonExprEval(t *testing.T) {

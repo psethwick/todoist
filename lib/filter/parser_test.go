@@ -12,7 +12,7 @@ func TestFilter(t *testing.T) {
 }
 
 func TestPriorityFilter(t *testing.T) {
-	assert.Equal(t, []Expression{StringExpr{words: []string{"p1"}}}, Filter("p1"), "they should be equal")
+	assert.Equal(t, []Expression{PriorityExpr{1}}, Filter("p1"), "they should be equal")
 	assert.Equal(t, []Expression{NoPriorityExpr{}}, Filter("No priority"), "they should be equal")
 }
 
@@ -116,9 +116,9 @@ func TestBoolInfixFilter(t *testing.T) {
 	assert.Equal(t,
 		[]Expression{
 			BoolInfixOpExpr{
-				left:     StringExpr{words: []string{"p1"}},
+				left:     PriorityExpr{1},
 				operator: '|',
-				right:    StringExpr{words: []string{"p2"}},
+				right:    PriorityExpr{2},
 			},
 		},
 		Filter("p1 | p2"), "they should be equal")
@@ -126,9 +126,9 @@ func TestBoolInfixFilter(t *testing.T) {
 	assert.Equal(t,
 		[]Expression{
 			BoolInfixOpExpr{
-				left:     StringExpr{words: []string{"p1"}},
+				left:     PriorityExpr{1},
 				operator: '&',
-				right:    StringExpr{words: []string{"p2"}},
+				right:    PriorityExpr{2},
 			},
 		},
 		Filter("p1 & p2"), "they should be equal")
@@ -136,12 +136,12 @@ func TestBoolInfixFilter(t *testing.T) {
 	assert.Equal(t,
 		[]Expression{
 			BoolInfixOpExpr{
-				left:     StringExpr{words: []string{"p1"}},
+				left:     PriorityExpr{1},
 				operator: '&',
 				right: BoolInfixOpExpr{
-					left:     StringExpr{words: []string{"p2"}},
+					left:     PriorityExpr{2},
 					operator: '|',
-					right:    StringExpr{words: []string{"p3"}},
+					right:    PriorityExpr{3},
 				},
 			},
 		},
@@ -422,6 +422,15 @@ func TestRecurring(t *testing.T) {
 			RecurringExpr{},
 		},
 		Filter("recurring"),
+	)
+}
+
+func TestPriority(t *testing.T) {
+	assert.Equal(t,
+		[]Expression{
+			PriorityExpr{1},
+		},
+		Filter("Priority 1"),
 	)
 }
 
@@ -714,7 +723,6 @@ func TestNoSyntaxErrorAllOfficialExamples(t *testing.T) {
 		"#Work & /Meetings",
 		"!/*",
 		"!/* & !#Inbox",
-
 		"due: yesterday, today",
 	}
 	for _, input := range tests {
