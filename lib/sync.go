@@ -1,22 +1,15 @@
 package todoist
 
 type Store struct {
-	CollaboratorStates []interface{} `json:"collaborator_states"`
-	Collaborators      Collaborators `json:"collaborators"`
-	DayOrders          interface{}   `json:"day_orders"`
-	DayOrdersTimestamp string        `json:"day_orders_timestamp"`
-	Filters            []struct {
-		Color     string `json:"color"`
-		ID        string `json:"id"`
-		IsDeleted bool   `json:"is_deleted"`
-		ItemOrder int    `json:"item_order"`
-		Name      string `json:"name"`
-		Query     string `json:"query"`
-	} `json:"filters"`
-	FullSync          bool   `json:"full_sync"`
-	Items             Items  `json:"items"`
-	Labels            Labels `json:"labels"`
-	LiveNotifications []struct {
+	CollaboratorStates CollaboratorStates `json:"collaborator_states"`
+	Collaborators      Collaborators      `json:"collaborators"`
+	DayOrders          interface{}        `json:"day_orders"`
+	DayOrdersTimestamp string             `json:"day_orders_timestamp"`
+	Filters            Filters            `json:"filters"`
+	FullSync           bool               `json:"full_sync"`
+	Items              Items              `json:"items"`
+	Labels             Labels             `json:"labels"`
+	LiveNotifications  []struct {
 		CompletedTasks   int     `json:"completed_tasks"`
 		Created          string  `json:"created_at"`
 		DateReached      string  `json:"date_reached"`
@@ -43,20 +36,10 @@ type Store struct {
 		ProjectID      *string     `json:"project_id"`
 		UidsToNotify   interface{} `json:"uids_to_notify"`
 	} `json:"notes"`
-	ProjectNotes []interface{} `json:"project_notes"`
-	Projects     Projects      `json:"projects"`
-	Sections     Sections      `json:"sections"`
-	Reminders    []struct {
-		DateLang     string      `json:"date_lang"`
-		Due          *Due        `json:"due"`
-		ID           string      `json:"id"`
-		IsDeleted    bool        `json:"is_deleted"`
-		ItemID       string      `json:"item_id"`
-		MinuteOffset int         `json:"minute_offset"`
-		NotifyUID    string      `json:"notify_uid"`
-		Service      interface{} `json:"service"`
-		Type         string      `json:"type"`
-	} `json:"reminders"`
+	ProjectNotes  []interface{}       `json:"project_notes"`
+	Projects      Projects            `json:"projects"`
+	Sections      Sections            `json:"sections"`
+	Reminders     Reminders           `json:"reminders"`
 	SyncToken     string              `json:"sync_token"`
 	TempIDMapping struct{}            `json:"temp_id_mapping"`
 	User          User                `json:"user"`
@@ -66,6 +49,43 @@ type Store struct {
 	ProjectMap    map[string]*Project `json:"-"`
 	LabelMap      map[string]*Label   `json:"-"`
 	SectionMap    map[string]*Section `json:"-"`
+}
+
+type Filter struct {
+	HaveID
+	Color     string `json:"color"`
+	IsDeleted bool   `json:"is_deleted"`
+	ItemOrder int    `json:"item_order"`
+	Name      string `json:"name"`
+	Query     string `json:"query"`
+}
+
+func (f Filter) Removable() bool {
+	return f.IsDeleted
+}
+
+type Filters []Filter
+
+type Reminder struct {
+	HaveID
+	DateLang     string      `json:"date_lang"`
+	Due          *Due        `json:"due"`
+	IsDeleted    bool        `json:"is_deleted"`
+	ItemID       string      `json:"item_id"`
+	MinuteOffset int         `json:"minute_offset"`
+	NotifyUID    string      `json:"notify_uid"`
+	Service      interface{} `json:"service"`
+	Type         string      `json:"type"`
+}
+
+func (r Reminder) Removable() bool {
+	return r.IsDeleted
+}
+
+type Reminders []Reminder
+
+type ID interface {
+	GetID() string
 }
 
 func (s *Store) FindItem(id string) *Item {
@@ -82,6 +102,79 @@ func (s *Store) FindSection(id string) *Section {
 
 func (s *Store) FindLabel(id string) *Label {
 	return s.LabelMap[id]
+}
+
+type Syncable interface {
+	IDCarrier
+	Removable() bool
+}
+
+func replace[T Syncable](s []T, n T) []T {
+	for i, item := range s {
+		if item.GetID() == n.GetID() {
+			s[i] = n
+			return s
+		}
+	}
+	return s
+}
+
+func remove[T Syncable](s []T, ID string) []T {
+	for i, item := range s {
+		if item.GetID() == ID {
+			s[i] = s[len(s)-1]
+			return s[:len(s)-1]
+		}
+	}
+	return s
+}
+
+func syncCollection[T Syncable](target []T, source []T) []T {
+	for _, s := range source {
+		id := s.GetID()
+		if s.Removable() {
+			target = remove(target, id)
+			break
+		}
+		found := false
+		for _, t := range target {
+			if t.GetID() == id {
+				target = replace(target, s)
+				found = true
+				break
+			}
+		}
+		if !found {
+			target = append(target, s)
+		}
+	}
+	return target
+}
+
+func (target *Store) ApplyIncrementalSync(source *Store) {
+	if source.FullSync {
+		target = source
+		return
+	}
+	target.Collaborators = syncCollection(target.Collaborators, source.Collaborators)
+	// target.CollaboratorStates = syncCollection(target.CollaboratorStates, source.CollaboratorStates)
+	// target.DayOrders = syncCollection(target.DayOrders, source.DayOrders)
+	target.DayOrdersTimestamp = source.DayOrdersTimestamp
+	target.Filters = syncCollection(target.Filters, source.Filters)
+	target.FullSync = source.FullSync
+	target.Items = syncCollection(target.Items, source.Items)
+	target.Labels = syncCollection(target.Labels, source.Labels)
+	// target.LiveNotifications = syncCollection(target.LiveNotifications, source.LiveNotifications)
+	target.LiveNotificationsLastReadID = source.LiveNotificationsLastReadID
+	// target.Locations = syncCollection(target.Locations, source.Locations)
+	// target.Notes = syncCollection(target.Notes, source.Notes)
+	// target.ProjectNotes = syncCollection(target.ProjectNotes, source.ProjectNotes)
+	target.Projects = syncCollection(target.Projects, source.Projects)
+	target.Sections = syncCollection(target.Sections, source.Sections)
+	target.Reminders = syncCollection(target.Reminders, source.Reminders)
+	target.SyncToken = source.SyncToken
+	target.User = source.User
+	target.ConstructItemTree()
 }
 
 func addToBrotherItem(item *Item, b *Item) {

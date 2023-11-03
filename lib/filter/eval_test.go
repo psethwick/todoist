@@ -258,17 +258,23 @@ func TestPersonExprEval(t *testing.T) {
 
 	collaborators := todoist.Collaborators{
 		{
-			ID:       "1",
+			HaveID: todoist.HaveID{
+				ID: "1",
+			},
 			Email:    "alice@example.com",
 			FullName: "Alice",
 		},
 		{
-			ID:       "2",
+			HaveID: todoist.HaveID{
+				ID: "2",
+			},
 			Email:    "bob@example.com",
 			FullName: "Bob",
 		},
 		{
-			ID:       "3",
+			HaveID: todoist.HaveID{
+				ID: "3",
+			},
 			FullName: "Definitely a Name",
 		},
 	}

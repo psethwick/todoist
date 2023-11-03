@@ -10,4 +10,8 @@ type Section struct {
 	SectionOrder int    `json:"section_order"`
 }
 
+func (s Section) Removable() bool {
+	return s.IsArchived || s.IsDeleted
+}
+
 type Sections []Section

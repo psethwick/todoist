@@ -8,6 +8,10 @@ type Label struct {
 	Name      string `json:"name"`
 }
 
+func (l Label) Removable() bool {
+	return l.IsDeleted
+}
+
 type Labels []Label
 
 func (a Labels) Len() int           { return len(a) }

@@ -24,6 +24,7 @@ type HaveIndent struct {
 type IDCarrier interface {
 	GetID() string
 }
+
 type Repository interface {
 	Len() int
 	At(int) IDCarrier

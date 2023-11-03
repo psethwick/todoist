@@ -24,6 +24,10 @@ type Project struct {
 	ViewStyle      string   `json:"view_style"`
 }
 
+func (p Project) Removable() bool {
+	return p.IsArchived || p.IsDeleted
+}
+
 type Projects []Project
 
 func (a Projects) Len() int           { return len(a) }

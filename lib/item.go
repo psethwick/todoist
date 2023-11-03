@@ -116,6 +116,7 @@ type Item struct {
 	AssignedByUID  string      `json:"assigned_by_uid"`
 	Checked        bool        `json:"checked"`
 	Collapsed      bool        `json:"collapsed"`
+	CompletedAt    string      `json:"completed_at"`
 	DateAdded      string      `json:"added_at"`
 	DateLang       string      `json:"date_lang"`
 	DateString     string      `json:"date_string"`
@@ -227,6 +228,10 @@ func (item Item) GetAssignedByUID() string {
 
 func (item Item) GetUserID() string {
 	return item.UserID
+}
+
+func (item Item) Removable() bool {
+	return item.IsDeleted || item.CompletedAt != ""
 }
 
 // interface for Eval actions
