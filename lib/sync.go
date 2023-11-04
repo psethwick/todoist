@@ -173,7 +173,9 @@ func (target *Store) ApplyIncrementalSync(source *Store) {
 	target.Sections = syncCollection(target.Sections, source.Sections)
 	target.Reminders = syncCollection(target.Reminders, source.Reminders)
 	target.SyncToken = source.SyncToken
-	target.User = source.User
+	if source.User != (User{}) {
+		target.User = source.User
+	}
 	target.ConstructItemTree()
 }
 
