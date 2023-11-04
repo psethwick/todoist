@@ -114,6 +114,18 @@ func (c *Client) QuickCommand(ctx context.Context, text string) error {
 	return c.doApi(ctx, http.MethodPost, "quick/add", values, &r)
 }
 
+func (c *Client) IncrementalSync(ctx context.Context, syncToken string) (*Store, error) {
+	var store Store
+	params := url.Values{"sync_token": {syncToken}, "resource_types": {"[\"all\"]"}}
+
+	err := c.doApi(ctx, http.MethodPost, "sync", params, &store)
+	if err != nil {
+		return nil, err
+	}
+	store.ConstructItemTree()
+	return &store, nil
+}
+
 func (c *Client) Sync(ctx context.Context) error {
 	params := url.Values{"sync_token": {"*"}, "resource_types": {"[\"all\"]"}}
 
