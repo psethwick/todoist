@@ -99,5 +99,6 @@ func (c *Client) AddProject(ctx context.Context, project Project) error {
 	commands := Commands{
 		NewCommand("project_add", project.AddParam()),
 	}
-	return c.ExecCommands(ctx, commands)
+	_, err := c.ExecCommands(ctx, commands)
+	return err
 }

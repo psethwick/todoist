@@ -85,15 +85,23 @@ func (c *Client) doApi(ctx context.Context, method string, uri string, params ur
 	return json.NewDecoder(resp.Body).Decode(&res)
 }
 
-type ExecResult struct {
-	SyncToken     string      `json:"sync_token"`
-	SyncStatus    interface{} `json:"sync_status"`
-	TempIdMapping interface{} `json:"temp_id_mapping"`
+type CommandError struct {
+	ErrorCode    int    `json:"error_code"`
+	ErrorMessage string `json:"error"`
 }
 
-func (c *Client) ExecCommands(ctx context.Context, commands Commands) error {
+type ExecResult struct {
+	SyncToken string `json:"sync_token"`
+	// keys are command uuid
+	// values are either string "ok" or CommandError
+	SyncStatus    map[string]interface{} `json:"sync_status"`
+	TempIdMapping map[string]string      `json:"temp_id_mapping"`
+}
+
+func (c *Client) ExecCommands(ctx context.Context, commands Commands) (ExecResult, error) {
 	var r ExecResult
-	return c.doApi(ctx, http.MethodPost, "sync", commands.UrlValues(), &r)
+	err := c.doApi(ctx, http.MethodPost, "sync", commands.UrlValues(), &r)
+	return r, err
 }
 
 func (c *Client) QuickCommand(ctx context.Context, text string) error {

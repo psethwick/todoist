@@ -369,14 +369,16 @@ func (c *Client) AddItem(ctx context.Context, item Item) error {
 	commands := Commands{
 		NewCommand("item_add", item.AddParam()),
 	}
-	return c.ExecCommands(ctx, commands)
+	_, err := c.ExecCommands(ctx, commands)
+	return err
 }
 
 func (c *Client) UpdateItem(ctx context.Context, item Item) error {
 	commands := Commands{
 		NewCommand("item_update", item.UpdateParam()),
 	}
-	return c.ExecCommands(ctx, commands)
+	_, err := c.ExecCommands(ctx, commands)
+	return err
 }
 
 func (c *Client) CloseItem(ctx context.Context, ids []string) error {
@@ -385,7 +387,8 @@ func (c *Client) CloseItem(ctx context.Context, ids []string) error {
 		command := NewCommand("item_close", map[string]interface{}{"id": id})
 		commands = append(commands, command)
 	}
-	return c.ExecCommands(ctx, commands)
+	_, err := c.ExecCommands(ctx, commands)
+	return err
 }
 
 func (c *Client) DeleteItem(ctx context.Context, ids []string) error {
@@ -394,12 +397,14 @@ func (c *Client) DeleteItem(ctx context.Context, ids []string) error {
 		command := NewCommand("item_delete", map[string]interface{}{"id": id})
 		commands = append(commands, command)
 	}
-	return c.ExecCommands(ctx, commands)
+	_, err := c.ExecCommands(ctx, commands)
+	return err
 }
 
 func (c *Client) MoveItem(ctx context.Context, item *Item, projectId string) error {
 	commands := Commands{
 		NewCommand("item_move", item.MoveParam(projectId)),
 	}
-	return c.ExecCommands(ctx, commands)
+	_, err := c.ExecCommands(ctx, commands)
+	return err
 }
