@@ -136,6 +136,10 @@ var timezone = func() *time.Location {
 	return now().Location()
 }
 
+func nowDuration() time.Duration {
+	return time.Duration(int64(time.Hour)*int64(now().Hour()) + int64(time.Minute)*int64(now().Minute()))
+}
+
 type Lexer struct {
 	scanner.Scanner
 	input  string
@@ -169,6 +173,14 @@ var MonthIdentHash = map[string]time.Month{
 }
 
 var WeekdayHash = map[string]time.Weekday{
+	"sun": time.Sunday,
+	"mon": time.Monday,
+	"tue": time.Tuesday,
+	"wed": time.Wednesday,
+	"thu": time.Thursday,
+	"fri": time.Friday,
+	"sat": time.Saturday,
+
 	"sunday":    time.Sunday,
 	"monday":    time.Monday,
 	"tuesday":   time.Tuesday,
@@ -298,10 +310,12 @@ func (l *Lexer) Lex(lval *yySymType) int {
 			} else {
 				token = STRING
 			}
-		} else if lowerToken == "days" {
+		} else if lowerToken == "days" || lowerToken == "day" {
 			token = DAYS
-		} else if lowerToken == "hours" {
+		} else if lowerToken == "hours" || lowerToken == "hour" {
 			token = HOURS
+		} else if lowerToken == "minutes" || lowerToken == "minute" {
+			token = MINUTES
 		} else if lowerToken == "shared" {
 			token = SHARED
 		} else if lowerToken == "created" {
