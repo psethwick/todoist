@@ -656,7 +656,36 @@ func TestSearchExpr(t *testing.T) {
 	)
 }
 
-func TestNoSyntaxErrorAllOfficialExamples(t *testing.T) {
+func TestTimeUnits(t *testing.T) {
+	timeNow := time.Date(2017, time.January, 2, 18, 0, 0, 0, testTimeZone)
+	setNow(timeNow)
+
+	actual := Filter("due before: +10 minutes")[0]
+	assert.Equal(
+		t,
+		DateExpr{operation: DUE_BEFORE, datetime: time.Date(2017, time.January, 2, 18, 10, 0, 0, testTimeZone)},
+		actual,
+		actual.(DateExpr).datetime.String(),
+	)
+
+	actual = Filter("due before: +2 hours")[0]
+	assert.Equal(
+		t,
+		DateExpr{operation: DUE_BEFORE, datetime: time.Date(2017, time.January, 2, 20, 0, 0, 0, testTimeZone)},
+		actual,
+		actual.(DateExpr).datetime.String(),
+	)
+
+	actual = Filter("due before: +2 day")[0]
+	assert.Equal(
+		t,
+		DateExpr{operation: DUE_BEFORE, datetime: time.Date(2017, time.January, 4, 0, 0, 0, 0, testTimeZone)},
+		actual,
+		actual.(DateExpr).datetime.String(),
+	)
+}
+
+func TestNoSyntaxError(t *testing.T) {
 	tests := []string{
 		"(today | overdue) & #Work",
 		"no date",
@@ -724,6 +753,13 @@ func TestNoSyntaxErrorAllOfficialExamples(t *testing.T) {
 		"!/*",
 		"!/* & !#Inbox",
 		"due: yesterday, today",
+
+		"due before: +10 minutes",
+		"due before: +10 minute",
+		"due before: +10 hours",
+		"due before: +10 hour",
+		"due before: +10 days",
+		"due before: +10 day",
 	}
 	for _, input := range tests {
 		for _, e := range Filter(input) {

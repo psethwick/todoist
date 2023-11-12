@@ -19,7 +19,7 @@ import (
 %type<expr> s_time s_person s_label_key s_no_labels s_string 
 %type<expr> s_special_chars s_priority
 %token<token> BY TO ADDED ASSIGNED SUBTASK SHARED STRING NUMBER NEXT
-%token<token> MONTH_IDENT TWELVE_CLOCK_IDENT HOURS PRIORITY RECURRING
+%token<token> MONTH_IDENT TWELVE_CLOCK_IDENT MINUTES HOURS PRIORITY RECURRING
 %token<token> TODAY_IDENT TOMORROW_IDENT YESTERDAY_IDENT DAYS VIEW ALL
 %token<token> DUE CREATED BEFORE AFTER OVER OVERDUE NO DATE TIME LABELS
 %token<token> SEARCH ORDINAL WEEKDAY YEAR_NUMBER AT P1 P2 P3 P4
@@ -416,9 +416,17 @@ s_time
     {
         $$ = time.Duration(int64(time.Hour) * int64(atoi($1.literal)) + int64(time.Minute) * int64(atoi($3.literal)) + int64(time.Second) * int64(atoi($5.literal)))
     }
+    | '+' NUMBER DAYS
+    {
+        $$ = time.Duration(int64(time.Hour) * int64(atoi($2.literal)) * 24)
+    }
     | '+' NUMBER HOURS
     {
-        $$ = time.Duration(int64(time.Hour) * int64(atoi($2.literal)))
+        $$ = nowDuration() + time.Duration(int64(time.Hour) * int64(atoi($2.literal)))
+    }
+    | '+' NUMBER MINUTES
+    {
+        $$ = nowDuration() + time.Duration(int64(time.Minute) * int64(atoi($2.literal)))
     }
     | NUMBER TWELVE_CLOCK_IDENT
     {
