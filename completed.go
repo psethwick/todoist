@@ -4,6 +4,7 @@ import (
 	"context"
 
 	todoist "github.com/sachaos/todoist/lib"
+	"github.com/sachaos/todoist/lib/filter"
 
 	"github.com/urfave/cli/v2"
 )
@@ -17,7 +18,6 @@ func CompletedList(c *cli.Context) error {
 		projectIds = append(projectIds, project.GetID())
 	}
 	projectColorHash := GenerateColorHash(projectIds, colorList)
-	ex := Filter(c.String("filter"))
 
 	var completed todoist.Completed
 
@@ -31,21 +31,22 @@ func CompletedList(c *cli.Context) error {
 		writer.Write([]string{"ID", "CompletedDate", "Project", "Content"})
 	}
 
-	for _, item := range completed.Items {
-		result, err := Eval(ex, item, client.Store.Projects)
-		if err != nil {
-			return err
+	for _, ex := range filter.Filter(c.String("filter")) {
+		for _, item := range completed.Items {
+			result, err := filter.Eval(ex, item, client.Store)
+			if err != nil {
+				return err
+			}
+			if !result {
+				continue
+			}
+			writer.Write([]string{
+				IdFormat(item),
+				CompletedDateFormat(item.DateTime()),
+				ProjectFormat(item.ProjectID, client.Store, projectColorHash, c),
+				ContentFormat(item),
+			})
 		}
-		if !result {
-			continue
-		}
-		writer.Write([]string{
-			IdFormat(item),
-			CompletedDateFormat(item.DateTime()),
-			ProjectFormat(item.ProjectID, client.Store, projectColorHash, c),
-			ContentFormat(item),
-		})
 	}
-
 	return nil
 }
