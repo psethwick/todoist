@@ -122,7 +122,6 @@ func (c *Client) IncrementalSync(ctx context.Context, syncToken string) (*Store,
 	if err != nil {
 		return nil, err
 	}
-	store.ConstructItemTree()
 	return &store, nil
 }
 
