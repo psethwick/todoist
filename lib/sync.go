@@ -217,9 +217,6 @@ func addToChildProject(project *Project, b *Project) {
 	addToBrotherProject(project.ChildProject, b)
 }
 
-// commented out brother/child things for tuidoist
-// with them you get really broken linked list null pointers
-// and I'm not using them, so
 func (s *Store) ConstructItemTree() {
 	s.LabelMap = map[string]*Label{}
 	s.ProjectMap = map[string]*Project{}
@@ -232,14 +229,14 @@ func (s *Store) ConstructItemTree() {
 
 	for i, item := range s.Items {
 		s.ItemMap[item.ID] = &s.Items[i]
-		// s.Items[i].ChildItem = nil
-		// s.Items[i].BrotherItem = nil
+		s.Items[i].ChildItem = nil
+		s.Items[i].BrotherItem = nil
 	}
 
 	for i, project := range s.Projects {
 		s.ProjectMap[project.ID] = &s.Projects[i]
-		// s.Projects[i].ChildProject = nil
-		// s.Projects[i].BrotherProject = nil
+		s.Projects[i].ChildProject = nil
+		s.Projects[i].BrotherProject = nil
 	}
 
 	for i, section := range s.Sections {
@@ -260,31 +257,31 @@ func (s *Store) ConstructItemTree() {
 		}
 	}
 
-	// for i := range s.Items {
-	// 	if s.Items[i].ID == s.RootItem.ID {
-	// 		continue
-	// 	}
-	//
-	// 	// if s.Items[i].ParentID == nil {
-	// 	// 	addToBrotherItem(s.RootItem, &s.Items[i])
-	// 	// 	continue
-	// 	// }
-	// 	// id, _ := s.Items[i].GetParentID()
-	// 	// parent := s.FindItem(id)
-	// 	// addToChildItem(parent, &s.Items[i])
-	// }
+	for i := range s.Items {
+		if s.Items[i].ID == s.RootItem.ID {
+			continue
+		}
 
-	// for i := range s.Projects {
-	// 	if s.Projects[i].ID == s.RootProject.ID {
-	// 		continue
-	// 	}
-	//
-	// 	// if s.Projects[i].ParentID == nil {
-	// 	// 	addToBrotherProject(s.RootProject, &s.Projects[i])
-	// 	// 	continue
-	// 	// }
-	// 	// id, _ := s.Projects[i].GetParentID()
-	// 	// parent := s.FindProject(id)
-	// 	// addToChildProject(parent, &s.Projects[i])
-	// }
+		if s.Items[i].ParentID == nil {
+			addToBrotherItem(s.RootItem, &s.Items[i])
+			continue
+		}
+		id, _ := s.Items[i].GetParentID()
+		parent := s.FindItem(id)
+		addToChildItem(parent, &s.Items[i])
+	}
+
+	for i := range s.Projects {
+		if s.Projects[i].ID == s.RootProject.ID {
+			continue
+		}
+
+		if s.Projects[i].ParentID == nil {
+			addToBrotherProject(s.RootProject, &s.Projects[i])
+			continue
+		}
+		id, _ := s.Projects[i].GetParentID()
+		parent := s.FindProject(id)
+		addToChildProject(parent, &s.Projects[i])
+	}
 }
