@@ -107,6 +107,7 @@ const (
 	DUE_AFTER
 	NO_DUE_DATE
 	NO_TIME
+	CREATED_AFTER
 	CREATED_BEFORE
 )
 
@@ -259,7 +260,7 @@ func (l *Lexer) Lex(lval *yySymType) int {
 				token = STRING
 			}
 		} else if lowerToken == "after" {
-			if l.last == DUE {
+			if l.last == DUE || l.last == CREATED {
 				token = AFTER
 			} else {
 				token = STRING
@@ -319,7 +320,7 @@ func (l *Lexer) Lex(lval *yySymType) int {
 		} else if lowerToken == "shared" {
 			token = SHARED
 		} else if lowerToken == "created" {
-			token = l.NextMatches(`[bB]efore`, CREATED, STRING)
+			token = l.NextMatches(`([bB]efore|[aA]fter)`, CREATED, STRING)
 		} else if lowerToken == "subtask" {
 			token = SUBTASK
 		} else if lowerToken == "priority" {

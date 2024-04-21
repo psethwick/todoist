@@ -126,6 +126,12 @@ expr
     {
         $$ = RecurringExpr{}
     }
+    | CREATED AFTER ':' s_datetime
+    {
+        e := $4.(DateExpr)
+        e.operation = CREATED_AFTER
+        $$ = e
+    }
     | CREATED BEFORE ':' s_datetime
     {
         e := $4.(DateExpr)

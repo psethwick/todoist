@@ -760,6 +760,8 @@ func TestNoSyntaxError(t *testing.T) {
 		"due before: +10 hour",
 		"due before: +10 days",
 		"due before: +10 day",
+
+		"created after: 30days ",
 	}
 	for _, input := range tests {
 		for _, e := range Filter(input) {
