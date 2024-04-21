@@ -58,6 +58,10 @@ func (item CompletedItem) DateTime() time.Time {
 	return t
 }
 
+func (item CompletedItem) CreatedTime() time.Time {
+	return time.Time{}
+}
+
 func (item CompletedItem) GetProjectID() string {
 	return item.ProjectID
 }
@@ -177,6 +181,11 @@ func (item Item) GetLabelNames() []string {
 	return item.LabelNames
 }
 
+func (item Item) CreatedTime() time.Time {
+	t, _ := time.Parse(time.RFC3339, item.DateAdded)
+	return t
+}
+
 func (item Item) HasTime() bool {
 	if item.Due == nil {
 		// no time doesn't apply if no due date
@@ -236,6 +245,7 @@ func (item Item) Removable() bool {
 
 // interface for Eval actions
 type AbstractItem interface {
+	CreatedTime() time.Time
 	DateTime() time.Time
 	GetProjectID() string
 	GetLabelNames() []string

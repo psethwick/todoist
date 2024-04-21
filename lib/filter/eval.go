@@ -127,24 +127,34 @@ func EvalDate(e DateExpr, item todoist.AbstractItem) (result bool) {
 		return e.operation == NO_DUE_DATE
 	}
 	allDay := e.allDay
-	dueDate := e.datetime
+	theDate := e.datetime
 	switch e.operation {
+	case CREATED_BEFORE:
+		if _, ok := item.(todoist.CompletedItem); ok {
+			return false
+		}
+		return item.CreatedTime().Before(theDate)
+	case CREATED_AFTER:
+		if _, ok := item.(todoist.CompletedItem); ok {
+			return false
+		}
+		return item.CreatedTime().After(theDate)
 	case DUE_ON:
 		var startDate, endDate time.Time
 		if allDay {
-			startDate = dueDate
-			endDate = dueDate.AddDate(0, 0, 1)
+			startDate = theDate
+			endDate = theDate.AddDate(0, 0, 1)
 			if itemDate.Equal(startDate) || (itemDate.After(startDate) && itemDate.Before(endDate)) {
 				return true
 			}
 		}
 		return false
 	case DUE_BEFORE:
-		return itemDate.Before(dueDate)
+		return itemDate.Before(theDate)
 	case DUE_AFTER:
-		endDateTime := dueDate
+		endDateTime := theDate
 		if allDay {
-			endDateTime = dueDate.AddDate(0, 0, 1).Add(-time.Duration(time.Microsecond))
+			endDateTime = theDate.AddDate(0, 0, 1).Add(-time.Duration(time.Microsecond))
 		}
 		return itemDate.After(endDateTime)
 	default:
