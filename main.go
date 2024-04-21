@@ -12,8 +12,8 @@ import (
 	"path/filepath"
 
 	"github.com/fatih/color"
+	"github.com/psethwick/todoist/lib"
 	"github.com/rkoesters/xdg/basedir"
-	"github.com/sachaos/todoist/lib"
 	"github.com/spf13/viper"
 	"github.com/urfave/cli/v2"
 )

@@ -4,7 +4,7 @@ import (
 	"context"
 	"strings"
 
-	todoist "github.com/sachaos/todoist/lib"
+	todoist "github.com/psethwick/todoist/lib"
 	"github.com/urfave/cli/v2"
 )
 

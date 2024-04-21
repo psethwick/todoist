@@ -6,7 +6,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	todoist "github.com/sachaos/todoist/lib"
+	todoist "github.com/psethwick/todoist/lib"
 )
 
 const DateFormat = "Mon 2 Jan 2006 15:04:05 +0000"

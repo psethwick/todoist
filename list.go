@@ -7,8 +7,8 @@ import (
 	"github.com/acarl005/stripansi"
 	"github.com/urfave/cli/v2"
 
-	todoist "github.com/sachaos/todoist/lib"
-	"github.com/sachaos/todoist/lib/filter"
+	todoist "github.com/psethwick/todoist/lib"
+	"github.com/psethwick/todoist/lib/filter"
 )
 
 func traverseItems(item *todoist.Item, f func(item *todoist.Item, depth int), depth int) {

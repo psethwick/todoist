@@ -6,7 +6,7 @@ import (
 	"io/ioutil"
 	"os"
 
-	"github.com/sachaos/todoist/lib"
+	"github.com/psethwick/todoist/lib"
 )
 
 func LoadCache(filename string, s *todoist.Store) error {

@@ -3,8 +3,8 @@ package main
 import (
 	"context"
 
-	todoist "github.com/sachaos/todoist/lib"
-	"github.com/sachaos/todoist/lib/filter"
+	todoist "github.com/psethwick/todoist/lib"
+	"github.com/psethwick/todoist/lib/filter"
 
 	"github.com/urfave/cli/v2"
 )

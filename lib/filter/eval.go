@@ -5,7 +5,7 @@ import (
 	"strings"
 	"time"
 
-	todoist "github.com/sachaos/todoist/lib"
+	todoist "github.com/psethwick/todoist/lib"
 )
 
 func Eval(e Expression, item todoist.AbstractItem, store *todoist.Store) (result bool, err error) {
